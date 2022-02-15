@@ -9,7 +9,7 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.text.html.parser.DTDConstants;
+
 
 /**
  *
@@ -47,9 +47,6 @@ public class Content {
     public void setTotalPages(int totalPages) {
         this.totalPages = totalPages;
     }
-    
-    
-    
-    
+ 
 }
 

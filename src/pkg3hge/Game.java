@@ -6,12 +6,19 @@
 package pkg3hge;
 
 import com.google.gson.annotations.SerializedName;
+import static java.nio.file.Files.list;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import static java.util.Collections.list;
 import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
 /**
+ *
+ * 
+ * 
+ * 
  *
  * @author Hyperer
  */
@@ -69,7 +76,7 @@ public class Game {
     public Game() {
     }
     
-    private class WinningNumbers {
+    public class WinningNumbers {
         private int [] list = new int[5];
         private int [] bonus = new int[1];
 
@@ -96,19 +103,38 @@ public class Game {
         public String toString(){
         String all = "";
         for(int i=0; i<list.length;i++){
-            all= all +list[i] +" ";
+            all= all +list[i] +"  ";
         }
-        return all + " " +bonus[0];
-       // return Arrays.toString(list) + Arrays.toString(bonus);
+        return all; // + "     " +bonus[0];
         }
+        
+        public int tzoker() {
+        return  bonus[0];
+       }
+        public int winNumber(int number) {
+        return  list[number];
+        }
+        
+        
+        
         
     }
     
-     @Override
+    @Override
     public String toString() {
         return (getWinningNumbers().toString());
     }
-    
+
+    public int getWinningNumber(int number) {
+
+        return winningNumbers.winNumber(number);
+    }
+
+    public int tzoker() {
+        return winningNumbers.tzoker();
+
+    }
+
     public int distributedMoney() {
         double totalDistributed = 0;
         for (PrizeCategories pc : prizeCategories) {
@@ -118,14 +144,14 @@ public class Game {
         }
         return (int) totalDistributed;
     }
-    
+
     public boolean jackpots() {
         for (PrizeCategories pc : prizeCategories) {
             if ((pc.getId() == 1) && (pc.getWinners() == 0)) {
-                return  true;
+                return true;
             }
         }
         return false;
     }
-    
+
 }

@@ -16,6 +16,7 @@ import okhttp3.Response;
 
 //sql
 import java.sql.*;
+import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 //sql
@@ -32,7 +33,7 @@ public class Controller {
         int page = 0;
         int counter = 0;
         String responseString = "";
-        Content test = new Content();
+        Content counterContents = new Content();
         ArrayList<Content> contents = new ArrayList<>();
 
         do {
@@ -52,19 +53,37 @@ public class Controller {
 
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             Content content = gson.fromJson(responseString, Content.class);
-            test = content;
+            counterContents = content;
             contents.add(content);
+     
 
-        } while (counter <= test.getTotalPages());
-
+        } while (counter <= counterContents.getTotalPages());
+        
+        
         return contents;
     }
     
-    
-    
-    
-    
-    
+    public static Game callDrawId(String callparameter) {
+        int page = 0;
+        String responseString = "";
+        ArrayList<Content> contents = new ArrayList<>();
+
+        String urlToCall = "https://api.opap.gr/draws/v3.0/5104/" + callparameter + "?page=" + page;
+        OkHttpClient client = new OkHttpClient();
+        Request request = new Request.Builder().url(urlToCall).build();
+
+        try (Response response = client.newCall(request).execute()) {
+            if (response.isSuccessful() && response.body() != null) {
+                responseString = response.body().string();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        Game game = gson.fromJson(responseString, Game.class);
+        return game;
+    }
     
     public static Connection connect() {
         String connectionString = "jdbc:derby:joker;create=true";
@@ -101,12 +120,13 @@ public class Controller {
         try {
             ArrayList<Content> contents = Controller.callDateRange("draw-date/2021-12-01/2022-02-05");
             Connection connection = Controller.connect();
-            PreparedStatement pstm = connection.prepareStatement("INSERT INTO GAME values(?,?,?)");
+            PreparedStatement pstm = connection.prepareStatement("INSERT INTO GAME values(?,?,?,?)");
             for (Content c : contents) {
                 for (Game g : c.getGames()) {
                     pstm.setInt(1, g.getDrawId());
                     pstm.setString(2, g.toString());
-                    pstm.setString(3, "ok");
+                   // pstm.setString(3, g.tzoker());
+                    pstm.setString(4, g.getDrawTime());
                     pstm.executeUpdate();
                 }
             }
