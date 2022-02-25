@@ -5,8 +5,12 @@
  */
 package pkg3hge;
 
-import java.util.ArrayList;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 
 /**
  *
@@ -14,100 +18,31 @@ import java.sql.SQLException;
  */
 public class Main {
 
+    static EntityManagerFactory emf;
+    static EntityManager em;
+
+    private static void createEMFandEM() {
+        emf = Persistence.createEntityManagerFactory("3hGEPU");
+        em = emf.createEntityManager();
+    }
+    
+    private static void insertDraw(Draw draw){
+        createEMFandEM();
+        em.getTransaction().begin();
+        em.persist(draw);
+        em.getTransaction().commit();
+        em.close();
+        emf.close();
+        System.out.println("done");
+    }
+
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) throws SQLException {
-            
-        
-        
-          
-            
-            
-            
-            
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-//          PreparedStatement stmt=connection.prepareStatement("select * from GAMES ");
-//                ResultSet rs=stmt.executeQuery();
-//                if(rs.next())
-//                {
-//                   System.out.println("ID : "+rs.getInt(1) +" "+" DRAWID :"+rs.getString(2));
-//                }
-//                else
-//                {
-//                   System.out.println("No word matching in database");
-//                }
-//        System.exit(0);
-          
-           // Controller.callParameter("2395");
-            //Content content =  Controller.callParameter("draw-id/2084/2227"); 
-            //Content content =  Controller.callDateRange("draw-date/2021-11-05/2022-02-05"); 
-               
-            ArrayList<Content> contents = Controller.callDateRange("draw-date/2022-01-01/2022-02-05");
-            
-//                 if (content != null) {
-//                     int jackpotsum =0;
-//                     int totalGames = 0;
-//            for (Game g : content.getGames()) {
-//                System.out.println(g.toString());
-//                System.out.println("dianemomena " +g.distributedMoney());
-//                
-//                if(g.jackpots()){
-//                    jackpotsum += 1;
-//                }
-//                totalGames +=1;        
-//            }
-//                     System.out.println("total jackpots " +jackpotsum);
-//                     System.out.println("total Games " +totalGames);
-//                     System.out.println("total pages " +content.getTotalPages());
-//        }
-         if (contents != null) {
-             int jackpotsum =0;
-             int totalGames = 0;
-             for (Content c : contents){
-                 for (Game g : c.getGames()) {
-                     System.out.println("-----------------------");
-                     System.out.println(g.toString());
-                     System.out.println(g.getDrawTime());
-                     System.out.println("dianemomena " +g.distributedMoney());
-                     
-                     System.out.println(g.getDrawId());
-               
-                     
-                     
-                     if(g.jackpots()){
-                          jackpotsum += 1;
-                     }
-                     totalGames +=1;
-                 }
-             }
-             System.out.println("total jackpots " +jackpotsum);
-             System.out.println("total Games " +totalGames);
-             
-         }    
-         
-             
-             
-          //Controller.insertTable();
-             
-             
-             
-             
-             
-             
-             
-             
-             
-    }
-    
 
+        Draw draw = Controller.callDrawId("2395");
+
+        insertDraw(draw);
+    }
 }

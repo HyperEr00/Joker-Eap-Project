@@ -5,21 +5,13 @@
  */
 package pkg3hge;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
+import com.google.gson.*;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-
-//sql
-import java.sql.*;
-import java.util.Collections;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-//sql
 
 /**
  *
@@ -27,48 +19,45 @@ import java.util.logging.Logger;
  */
 public class Controller {
 
-    private ArrayList<Game> games = new ArrayList<Game>();
-
-    public static ArrayList callDateRange(String callparameter) {
-        int page = 0;
-        int counter = 0;
+  public static ArrayList callDateRange(String callparameter) {
+        int currentPage = 0;
+        int totalPages = 0;
         String responseString = "";
-        Content counterContents = new Content();
-        ArrayList<Content> contents = new ArrayList<>();
+        ArrayList<Draw> draws = new ArrayList<>();
 
         do {
-            String urlToCall = "https://api.opap.gr/draws/v3.0/5104/" + callparameter + "?page=" + page;
+            String urlToCall = "https://api.opap.gr/draws/v3.0/5104/" + callparameter + "?page=" + currentPage;
             OkHttpClient client = new OkHttpClient();
             Request request = new Request.Builder().url(urlToCall).build();
 
             try (Response response = client.newCall(request).execute()) {
                 if (response.isSuccessful() && response.body() != null) {
                     responseString = response.body().string();
-                    page += 1;
-                    counter += 1;
+                    currentPage += 1;
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            Content content = gson.fromJson(responseString, Content.class);
-            counterContents = content;
-            contents.add(content);
-     
+            JsonObject jsonObject = gson.fromJson(responseString, JsonObject.class);
 
-        } while (counter <= counterContents.getTotalPages());
-        
-        
-        return contents;
+            totalPages = jsonObject.get("totalPages").getAsInt();
+
+            JsonArray contentArray = jsonObject.getAsJsonArray("content");
+            for (JsonElement je : contentArray) {
+                draws.add(parseDraw(je.getAsJsonObject()));
+            }
+
+        } while (currentPage <= totalPages);
+
+        return draws;
     }
-    
-    public static Game callDrawId(String callparameter) {
-        int page = 0;
-        String responseString = "";
-        ArrayList<Content> contents = new ArrayList<>();
 
-        String urlToCall = "https://api.opap.gr/draws/v3.0/5104/" + callparameter + "?page=" + page;
+    public static Draw callDrawId(String callparameter) {
+        String responseString = "";
+
+        String urlToCall = "https://api.opap.gr/draws/v3.0/5104/" + callparameter;
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder().url(urlToCall).build();
 
@@ -81,61 +70,53 @@ public class Controller {
         }
 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        Game game = gson.fromJson(responseString, Game.class);
-        return game;
+        JsonObject jsonObject = gson.fromJson(responseString, JsonObject.class);
+
+        return parseDraw(jsonObject);
     }
-    
-    public static Connection connect() {
-        String connectionString = "jdbc:derby:joker;create=true";
-        Connection connection = null;
-        try {
-            connection = DriverManager.getConnection(connectionString);
-        } catch (SQLException ex){
-            Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null,ex);
+
+    public static Draw parseDraw(JsonObject jsonObject) {
+        Draw newDraw = new Draw();
+        ArrayList<Integer> winningNumbers = new ArrayList<>();
+        Collection<Prizecategory> prizecategorys = new ArrayList<>();
+        int bonus = 0;
+        int drawId = jsonObject.get("drawId").getAsInt();
+        long drawTimeUnix = jsonObject.get("drawTime").getAsLong();
+     //   String sd =  jsonObject.getAsJsonObject("winningNumbers").getAsJsonArray("list").toString();
+      //  System.out.println(sd);
+        JsonArray numbersList = jsonObject.getAsJsonObject("winningNumbers").getAsJsonArray("list");
+
+        for (JsonElement je : numbersList) {
+            winningNumbers.add(je.getAsInt());
         }
-        return connection;
-    }
-    
-    public static void createTable() {
-        try {
-            Connection connection = Controller.connect();
-//            String createTableSql = "CREATE TABLE GAME"
-//                    + "(DRAWID INTEGER NOT NULL PRIMARY KEY,"
-//                    + "NUMBERS VARCHAR(20), "
-//                    + "JOKER VARCHAR (5))";
-                String insertSql = "INSERT INTO GAME VALUES(2,'10 4 5 22','19')";
-            Statement statement = connection.createStatement();
-//            statement.execute(createTableSql);
-                statement.execute(insertSql);
-            statement.close();
-            connection.close();
-            
-            
-        } catch (SQLException ex) {
-            Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
+
+        JsonArray bonusList = jsonObject.getAsJsonObject("winningNumbers").getAsJsonArray("bonus");
+        for (JsonElement je : bonusList) {
+            bonus = je.getAsInt();
         }
-    }
-    
-        public static void insertTable() {
-        try {
-            ArrayList<Content> contents = Controller.callDateRange("draw-date/2021-12-01/2022-02-05");
-            Connection connection = Controller.connect();
-            PreparedStatement pstm = connection.prepareStatement("INSERT INTO GAME values(?,?,?,?)");
-            for (Content c : contents) {
-                for (Game g : c.getGames()) {
-                    pstm.setInt(1, g.getDrawId());
-                    pstm.setString(2, g.toString());
-                   // pstm.setString(3, g.tzoker());
-                    pstm.setString(4, g.getDrawTime());
-                    pstm.executeUpdate();
-                }
-            }
-            pstm.close();
-            connection.close();
-            
-            
-        } catch (SQLException ex) {
-            Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
+        
+        newDraw.setDrawid(drawId);
+        newDraw.setDrawtime(drawTimeUnix);
+        newDraw.setFirstnumber(winningNumbers.get(0));
+        newDraw.setSecondnumber(winningNumbers.get(1));
+        newDraw.setThirdnumber(winningNumbers.get(2));
+        newDraw.setFourthnumber(winningNumbers.get(3));
+        newDraw.setFifthnumber(winningNumbers.get(4));
+        newDraw.setJoker(bonus);
+              
+        JsonArray pzArray = jsonObject.getAsJsonArray("prizeCategories");
+        for (JsonElement je : pzArray) {
+            int idCategory = je.getAsJsonObject().get("id").getAsInt();
+            double divident = je.getAsJsonObject().get("divident").getAsDouble();
+            int winners = je.getAsJsonObject().get("winners").getAsInt();
+            double distributed = je.getAsJsonObject().get("distributed").getAsDouble();
+            double jackpot = je.getAsJsonObject().get("jackpot").getAsDouble();
+
+            Prizecategory anPc = new Prizecategory(idCategory, distributed, divident, jackpot, winners, newDraw);
+            prizecategorys.add(anPc);
         }
+
+        newDraw.setPrizecategoryCollection(prizecategorys);
+        return newDraw;
     }
 }

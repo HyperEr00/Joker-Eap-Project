@@ -6,9 +6,12 @@
 package frames;
 
 import java.util.ArrayList;
+import javax.persistence.Entity;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
-import pkg3hge.Content;
 import pkg3hge.Controller;
 import pkg3hge.Game;
 import pkg3hge.PrizeCategories;
@@ -18,10 +21,14 @@ import pkg3hge.PrizeCategories;
  * @author Hyperer
  */
 public class Main extends javax.swing.JFrame {
+        static EntityManagerFactory emf;
+        static EntityManager em;
 
-    /**
-     * Creates new form Main
-     */
+    private static void createEMFandEM() {
+        emf = Persistence.createEntityManagerFactory("3hGEPU");
+        em = emf.createEntityManager();
+    }    
+    
     public Main() {
         initComponents();
     }
@@ -279,6 +286,8 @@ public class Main extends javax.swing.JFrame {
      * @param args the command line arguments
      */
     public static void main(String args[]) {
+        
+         createEMFandEM();
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
@@ -308,6 +317,10 @@ public class Main extends javax.swing.JFrame {
                 new Main().setVisible(true);
             }
         });
+        
+      
+        
+        
     }
     
     public void showGames() {
