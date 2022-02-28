@@ -75,17 +75,15 @@ public class Controller {
         return parseDraw(jsonObject);
     }
 
-    public static Draw parseDraw(JsonObject jsonObject) {
+        public static Draw parseDraw(JsonObject jsonObject) {
         Draw newDraw = new Draw();
         ArrayList<Integer> winningNumbers = new ArrayList<>();
         Collection<Prizecategory> prizecategorys = new ArrayList<>();
         int bonus = 0;
-        int drawId = jsonObject.get("drawId").getAsInt();
+        Integer drawId = jsonObject.get("drawId").getAsInt();
         long drawTimeUnix = jsonObject.get("drawTime").getAsLong();
-     //   String sd =  jsonObject.getAsJsonObject("winningNumbers").getAsJsonArray("list").toString();
-      //  System.out.println(sd);
+       
         JsonArray numbersList = jsonObject.getAsJsonObject("winningNumbers").getAsJsonArray("list");
-
         for (JsonElement je : numbersList) {
             winningNumbers.add(je.getAsInt());
         }
@@ -96,7 +94,7 @@ public class Controller {
         }
         
         newDraw.setDrawid(drawId);
-        newDraw.setDrawtime(drawTimeUnix);
+        newDraw.setDrawidtime(drawTimeUnix);   
         newDraw.setFirstnumber(winningNumbers.get(0));
         newDraw.setSecondnumber(winningNumbers.get(1));
         newDraw.setThirdnumber(winningNumbers.get(2));

@@ -6,8 +6,11 @@
 package pkg3hge;
 
 import java.io.Serializable;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
@@ -23,7 +26,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Draw.findAll", query = "SELECT d FROM Draw d")
     , @NamedQuery(name = "Draw.findById", query = "SELECT d FROM Draw d WHERE d.id = :id")
     , @NamedQuery(name = "Draw.findByDrawid", query = "SELECT d FROM Draw d WHERE d.drawid = :drawid")
-    , @NamedQuery(name = "Draw.findByDrawtime", query = "SELECT d FROM Draw d WHERE d.drawtime = :drawtime")
+    , @NamedQuery(name = "Draw.findByDrawIdtime", query = "SELECT d FROM Draw d WHERE d.drawidtime = :drawidtime")        
     , @NamedQuery(name = "Draw.findByFirstnumber", query = "SELECT d FROM Draw d WHERE d.firstnumber = :firstnumber")
     , @NamedQuery(name = "Draw.findBySecondnumber", query = "SELECT d FROM Draw d WHERE d.secondnumber = :secondnumber")
     , @NamedQuery(name = "Draw.findByThirdnumber", query = "SELECT d FROM Draw d WHERE d.thirdnumber = :thirdnumber")
@@ -40,8 +43,9 @@ public class Draw implements Serializable {
     private Long id;
     @Column(name = "DRAWID")
     private Integer drawid;
-    @Column(name = "DRAWTIME")
-    private String drawtime;
+    @Column(name = "DRAWIDTIME")
+    @Temporal(javax.persistence.TemporalType.DATE)
+    private Date drawidtime;
     @Column(name = "FIRSTNUMBER")
     private Integer firstnumber;
     @Column(name = "SECONDNUMBER")
@@ -80,12 +84,12 @@ public class Draw implements Serializable {
         this.drawid = drawid;
     }
 
-    public String getDrawtime() {
-        return drawtime;
+    public Date getDrawidtime() {
+        return drawidtime;
     }
 
-    public void setDrawtime(long drawtime) {
-        this.drawtime = convertTime(drawtime);
+    public void setDrawidtime(long drawidtime) {
+        this.drawidtime = convertTime(drawidtime);
     }
 
     public Integer getFirstnumber() {
@@ -189,13 +193,12 @@ public class Draw implements Serializable {
         return false;
     }
 
-    public String convertTime(long drawTimeUnix) {
+    public Date convertTime(long drawTimeUnix) {
         long unixTime = drawTimeUnix / 1000;
         Date date = new Date(unixTime * 1000L);
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
         sdf.setTimeZone(TimeZone.getTimeZone("GMT+2"));
-        String javaTime = sdf.format(date);
-        return javaTime;
+        return date;
     }
     
 }
