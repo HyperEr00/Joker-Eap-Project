@@ -6,14 +6,17 @@
 package frames;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
+import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import pkg3hge.Draw;
+import pkg3hge.Prizecategory;
 
 /**
  *
@@ -27,12 +30,16 @@ public class R3screen extends javax.swing.JFrame {
         "Ιούλιος", "Αύγουστος", "Σεπτέμβριος", "Οκτώβριος", "Νοέμβριος", "Δεκέμβριος"};
     static int yearForView;
     static int monthForView;
-  
+    static int totalDraws;
+    static int jackpots;
+    static String prizesFormated;
+
     /**
      * Creates new form Menu
      */
     public R3screen() {
         initComponents();
+        
     }
 
     private static void createEMFandEM() {
@@ -99,7 +106,34 @@ public class R3screen extends javax.swing.JFrame {
             model.addRow(rowData);
         }
     }
+    
+    private void showDraws() {
+        totalDraws = 0;
+        jackpots = 0;
+        int totalPrizes = 0;
+          
+        createEMFandEM();
+        em.getTransaction().begin();
+        Query query = em.createNamedQuery("Draw.findAll", Draw.class);
+        List<Draw> draws = query.getResultList();
+        
 
+        for (Draw draw : draws) {
+            if (yearForView == draw.getDrawidtime().getYear()) {
+                if (monthForView == draw.getDrawidtime().getMonth()) {
+                   totalDraws += 1;
+                   jackpots += draw.getjackpots();
+                   totalPrizes += draw.getdistributedMoney();
+                }
+            }
+        }
+        em.close();
+        emf.close();
+        
+        prizesFormated = String.format("%,d", totalPrizes);
+        new R3results().setVisible(true);
+    }
+        
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -148,10 +182,10 @@ public class R3screen extends javax.swing.JFrame {
         jPanel1.setBackground(new java.awt.Color(204, 204, 204));
         jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
-        jLabelInsertDraw.setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
+        jLabelInsertDraw.setFont(new java.awt.Font("Arial", 0, 24)); // NOI18N
         jLabelInsertDraw.setText("Επιλογή Έτους");
 
-        jLabelInsertDraw1.setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
+        jLabelInsertDraw1.setFont(new java.awt.Font("Arial", 0, 24)); // NOI18N
         jLabelInsertDraw1.setText("Επιλογή Μήνα");
 
         jTable1.setFont(new java.awt.Font("Arial", 0, 24)); // NOI18N
@@ -181,7 +215,7 @@ public class R3screen extends javax.swing.JFrame {
         });
         jScrollPane2.setViewportView(jTable1);
 
-        jButton1.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        jButton1.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
         jButton1.setText("Εμφάνιση");
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -221,21 +255,26 @@ public class R3screen extends javax.swing.JFrame {
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(59, 59, 59)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 129, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabelInsertDraw))
-                .addGap(61, 61, 61)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabelInsertDraw1)
-                        .addGap(48, 48, 48))
-                    .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 205, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(451, Short.MAX_VALUE))
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(74, 74, 74)
-                .addComponent(jButton1)
-                .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGap(59, 59, 59)
+                                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 129, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGap(44, 44, 44)
+                                .addComponent(jLabelInsertDraw)))
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGap(79, 79, 79)
+                                .addComponent(jLabelInsertDraw1))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGap(52, 52, 52)
+                                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 205, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(59, 59, 59)
+                        .addComponent(jButton1)))
+                .addContainerGap(644, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -245,9 +284,9 @@ public class R3screen extends javax.swing.JFrame {
                     .addComponent(jLabelInsertDraw)
                     .addComponent(jLabelInsertDraw1))
                 .addGap(18, 18, 18)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 282, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 282, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 282, Short.MAX_VALUE)
+                    .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 282, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButton1)
                 .addContainerGap(235, Short.MAX_VALUE))
@@ -257,12 +296,8 @@ public class R3screen extends javax.swing.JFrame {
         jPanelMenu.setLayout(jPanelMenuLayout);
         jPanelMenuLayout.setHorizontalGroup(
             jPanelMenuLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanelMenuLayout.createSequentialGroup()
-                .addGap(55, 55, 55)
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 234, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelMenuLayout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap(261, Short.MAX_VALUE)
                 .addGroup(jPanelMenuLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelMenuLayout.createSequentialGroup()
                         .addComponent(menuTitle)
@@ -270,6 +305,10 @@ public class R3screen extends javax.swing.JFrame {
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelMenuLayout.createSequentialGroup()
                         .addComponent(jButtonExit)
                         .addGap(40, 40, 40))))
+            .addGroup(jPanelMenuLayout.createSequentialGroup()
+                .addGap(55, 55, 55)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
         );
         jPanelMenuLayout.setVerticalGroup(
             jPanelMenuLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -278,7 +317,7 @@ public class R3screen extends javax.swing.JFrame {
                 .addComponent(menuTitle, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 13, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jButtonExit)
                 .addGap(20, 20, 20))
         );
@@ -305,7 +344,11 @@ public class R3screen extends javax.swing.JFrame {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         ArrayList<Integer> years = showAvailableYears();
-        drawTable1(years);
+        if(years.isEmpty()){
+            JOptionPane.showMessageDialog(this, "Δεν υπάρχουν δεδομένα για εμφάνιση.");
+        }else {
+            drawTable1(years);
+        }
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jTable1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable1MouseClicked
@@ -326,11 +369,10 @@ public class R3screen extends javax.swing.JFrame {
 
         for(int i = 0; i < monthName.length; i++) {
             if(monthName[i].equals(monthSelected)){
-                index = i;
-                new R3results().setVisible(true);
+                monthForView = i;
             }
         }
-        
+        showDraws();
     }//GEN-LAST:event_jTable2MouseClicked
 
     /**
@@ -342,22 +384,7 @@ public class R3screen extends javax.swing.JFrame {
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
          * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
          */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(R3screen.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(R3screen.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(R3screen.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(R3screen.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
+
         //</editor-fold>
         //</editor-fold>
 
@@ -382,4 +409,5 @@ public class R3screen extends javax.swing.JFrame {
     private javax.swing.JTable jTable2;
     private javax.swing.JLabel menuTitle;
     // End of variables declaration//GEN-END:variables
+
 }

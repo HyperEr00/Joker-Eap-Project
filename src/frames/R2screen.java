@@ -126,10 +126,10 @@ public class R2screen extends javax.swing.JFrame {
             Query query = em.createNamedQuery("Draw.findByDrawid", Draw.class);
             query.setParameter("drawid", drawId);
             Draw draw = (Draw) query.getSingleResult();
-            Collection<Prizecategory> p = draw.getPrizecategoryCollection();
-            for (Prizecategory pz : p) {
-                em.remove(pz);
-            }
+//            Collection<Prizecategory> p = draw.getPrizecategoryCollection();
+//            for (Prizecategory pz : p) {
+//                em.remove(pz);
+//            }
             em.remove(draw);
             recordsDeleted += 1;
         }
@@ -153,10 +153,10 @@ public class R2screen extends javax.swing.JFrame {
         for (Draw draw : draws) {
                 drawDate = draw.getDrawidtime();
             if ((drawDate.before(end) && drawDate.after(start)) || drawDate.equals(start) || drawDate.equals(end)) {
-                Collection<Prizecategory> p = draw.getPrizecategoryCollection();
-                for (Prizecategory pz : p) {
-                    em.remove(pz);
-                }
+//                Collection<Prizecategory> p = draw.getPrizecategoryCollection();
+//                for (Prizecategory pz : p) {
+//                    em.remove(pz);
+//                }
                 em.remove(draw);
                 recordsDeleted += 1;
             }
@@ -541,7 +541,7 @@ public class R2screen extends javax.swing.JFrame {
                             .addComponent(jTextFieldDrawForDel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(18, 18, 18)
                         .addComponent(jButtonDeleteStatistics)))
-                .addContainerGap(30, Short.MAX_VALUE))
+                .addContainerGap(42, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout jPanelR2Layout = new javax.swing.GroupLayout(jPanelR2);
@@ -582,7 +582,7 @@ public class R2screen extends javax.swing.JFrame {
                         .addGroup(jPanelR2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(jPanelR2Tables, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
-                .addContainerGap(54, Short.MAX_VALUE))
+                .addContainerGap(42, Short.MAX_VALUE))
         );
         jPanelR2Layout.setVerticalGroup(
             jPanelR2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)

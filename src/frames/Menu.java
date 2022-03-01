@@ -64,7 +64,7 @@ public class Menu extends javax.swing.JFrame {
         menuTitle.setFont(new java.awt.Font("Arial", 1, 24)); // NOI18N
         menuTitle.setText("ΑΝΑΛΥΣΗ ΑΠΟΤΕΛΕΣΜΑΤΩΝ ΠΑΙΧΝΙΔΙΩΝ ΟΠΑΠ ");
 
-        jButtonManageData.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        jButtonManageData.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
         jButtonManageData.setText("Διαχείριση δεδομένων");
         jButtonManageData.setToolTipText("");
         jButtonManageData.addActionListener(new java.awt.event.ActionListener() {
@@ -73,10 +73,10 @@ public class Menu extends javax.swing.JFrame {
             }
         });
 
-        jLabelselect.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
+        jLabelselect.setFont(new java.awt.Font("Arial", 1, 20)); // NOI18N
         jLabelselect.setText("Επιλογή παιχνιδιού :");
 
-        jButtonExit.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        jButtonExit.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
         jButtonExit.setText("Έξοδος");
         jButtonExit.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -84,10 +84,10 @@ public class Menu extends javax.swing.JFrame {
             }
         });
 
-        jButtonViewData.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        jButtonViewData.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
         jButtonViewData.setText("Προβολή στατιστικών δεδομένων ΤΖΟΚΕΡ και εκτύπωση σε αρχείο pdf");
 
-        jButtonViewStatistics.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        jButtonViewStatistics.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
         jButtonViewStatistics.setText("Προβολή δεδομένων ανά μήνα για συγκεκριμένο έτος");
         jButtonViewStatistics.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -114,7 +114,7 @@ public class Menu extends javax.swing.JFrame {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelMenuLayout.createSequentialGroup()
                 .addGap(0, 0, Short.MAX_VALUE)
                 .addComponent(jButtonExit)
-                .addGap(45, 45, 45))
+                .addGap(40, 40, 40))
             .addGroup(jPanelMenuLayout.createSequentialGroup()
                 .addGap(27, 27, 27)
                 .addComponent(jLabelOpap)
@@ -159,9 +159,9 @@ public class Menu extends javax.swing.JFrame {
                 .addComponent(jButtonViewStatistics)
                 .addGap(43, 43, 43)
                 .addComponent(jButtonViewData)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 221, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 208, Short.MAX_VALUE)
                 .addComponent(jButtonExit)
-                .addGap(18, 18, 18))
+                .addGap(20, 20, 20))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());

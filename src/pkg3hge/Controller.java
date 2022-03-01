@@ -9,6 +9,9 @@ import com.google.gson.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -18,8 +21,8 @@ import okhttp3.Response;
  * @author Hyperer
  */
 public class Controller {
-
-  public static ArrayList callDateRange(String callparameter) {
+    
+    public static ArrayList callDateRange(String callparameter) {
         int currentPage = 0;
         int totalPages = 0;
         String responseString = "";
@@ -75,14 +78,14 @@ public class Controller {
         return parseDraw(jsonObject);
     }
 
-        public static Draw parseDraw(JsonObject jsonObject) {
+    public static Draw parseDraw(JsonObject jsonObject) {
         Draw newDraw = new Draw();
         ArrayList<Integer> winningNumbers = new ArrayList<>();
         Collection<Prizecategory> prizecategorys = new ArrayList<>();
         int bonus = 0;
         Integer drawId = jsonObject.get("drawId").getAsInt();
         long drawTimeUnix = jsonObject.get("drawTime").getAsLong();
-       
+
         JsonArray numbersList = jsonObject.getAsJsonObject("winningNumbers").getAsJsonArray("list");
         for (JsonElement je : numbersList) {
             winningNumbers.add(je.getAsInt());
@@ -92,16 +95,16 @@ public class Controller {
         for (JsonElement je : bonusList) {
             bonus = je.getAsInt();
         }
-        
+
         newDraw.setDrawid(drawId);
-        newDraw.setDrawidtime(drawTimeUnix);   
+        newDraw.setDrawidtime(drawTimeUnix);
         newDraw.setFirstnumber(winningNumbers.get(0));
         newDraw.setSecondnumber(winningNumbers.get(1));
         newDraw.setThirdnumber(winningNumbers.get(2));
         newDraw.setFourthnumber(winningNumbers.get(3));
         newDraw.setFifthnumber(winningNumbers.get(4));
         newDraw.setJoker(bonus);
-              
+
         JsonArray pzArray = jsonObject.getAsJsonArray("prizeCategories");
         for (JsonElement je : pzArray) {
             int idCategory = je.getAsJsonObject().get("id").getAsInt();
@@ -117,4 +120,5 @@ public class Controller {
         newDraw.setPrizecategoryCollection(prizecategorys);
         return newDraw;
     }
+
 }

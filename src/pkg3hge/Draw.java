@@ -58,7 +58,7 @@ public class Draw implements Serializable {
     private Integer fifthnumber;
     @Column(name = "JOKER")
     private Integer joker;
-    @OneToMany(mappedBy = "drawid", cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "drawid", cascade = CascadeType.ALL)
     private Collection<Prizecategory> prizecategoryCollection;
 
     public Draw() {
@@ -174,23 +174,25 @@ public class Draw implements Serializable {
         return "pkg3hge.Draw[ id=" + id + " ]";
     }
     
-    public int distributedMoney() {
+    public int getdistributedMoney() {
         double totalDistributed = 0;
-        for (Prizecategory pc : prizecategoryCollection) {
-            if ((pc.getId() == 1) || (pc.getId() == 2)) {
+        Collection<Prizecategory> prizeCat = getPrizecategoryCollection();
+        for (Prizecategory pc : prizeCat) {
+            if ((pc.getIdcategory()== 1) || (pc.getIdcategory()== 2)) {
                 totalDistributed += pc.getDistributed() + pc.getJackpot();
             }
         }
+        System.out.println(totalDistributed);
         return (int) totalDistributed;
     }
 
-    public boolean jackpots() {
+    public int getjackpots() {
         for (Prizecategory pc : prizecategoryCollection) {
-            if ((pc.getId() == 1) && (pc.getWinners() == 0)) {
-                return true;
+            if ((pc.getIdcategory()== 1) && (pc.getWinners() == 0)) {
+                return 1;
             }
         }
-        return false;
+        return 0;
     }
 
     public Date convertTime(long drawTimeUnix) {
