@@ -6,13 +6,8 @@
 package frames;
 
 
-import frames.R2screen;
+
 import javax.swing.JOptionPane;
-import pkg3hge.Controller;
-import pkg3hge.Controller;
-import pkg3hge.Draw;
-import pkg3hge.Draw;
-import pkg3hge.Prizecategory;
 
 
 

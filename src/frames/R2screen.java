@@ -61,9 +61,6 @@ public class R2screen extends javax.swing.JFrame {
         for (Draw draw : drawsMain) {
             if (draw.getDrawid() == number) {
                 Collection<Prizecategory> prizeCategories = draw.getPrizecategoryCollection();
-//                if(sortPrizeC){
-//                    Collections.sort(prizeCategories);
-//                }
                 for (Prizecategory pr : prizeCategories) {
                     System.out.println(pr.getIdcategory());
                     rowData[0] = catTzoker[cat];
@@ -140,14 +137,6 @@ public class R2screen extends javax.swing.JFrame {
                 System.out.println(p.getIdcategory());
             }
         }
-        
-        //("SELECT p FROM Prizecategory ORDER BY p.idcategory ASC")
-        
-      //  Collection<Prizecategory> pz = query.getResultList();
-//        for(Prizecategory p :pz ){
-//            System.out.println(p.getIdcategory());
-//        }
- 
         em.close();
         emf.close();
     }
@@ -160,10 +149,6 @@ public class R2screen extends javax.swing.JFrame {
             Query query = em.createNamedQuery("Draw.findByDrawid", Draw.class);
             query.setParameter("drawid", drawId);
             Draw draw = (Draw) query.getSingleResult();
-//            Collection<Prizecategory> p = draw.getPrizecategoryCollection();
-//            for (Prizecategory pz : p) {
-//                em.remove(pz);
-//            }
             em.remove(draw);
             recordsDeleted += 1;
         }
@@ -187,10 +172,6 @@ public class R2screen extends javax.swing.JFrame {
         for (Draw draw : draws) {
                 drawDate = draw.getDrawidtime();
             if ((drawDate.before(end) && drawDate.after(start)) || drawDate.equals(start) || drawDate.equals(end)) {
-//                Collection<Prizecategory> p = draw.getPrizecategoryCollection();
-//                for (Prizecategory pz : p) {
-//                    em.remove(pz);
-//                }
                 em.remove(draw);
                 recordsDeleted += 1;
             }
@@ -361,15 +342,6 @@ public class R2screen extends javax.swing.JFrame {
         jButtonSaveStatistics.setBackground(new java.awt.Color(146, 202, 142));
         jButtonSaveStatistics.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
         jButtonSaveStatistics.setText("Αποθήκευση δεδομένων");
-        jButtonSaveStatistics.addAncestorListener(new javax.swing.event.AncestorListener() {
-            public void ancestorMoved(javax.swing.event.AncestorEvent evt) {
-            }
-            public void ancestorAdded(javax.swing.event.AncestorEvent evt) {
-                jButtonSaveStatisticsAncestorAdded(evt);
-            }
-            public void ancestorRemoved(javax.swing.event.AncestorEvent evt) {
-            }
-        });
         jButtonSaveStatistics.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonSaveStatisticsActionPerformed(evt);
@@ -378,15 +350,6 @@ public class R2screen extends javax.swing.JFrame {
 
         jButtonLoadStatistics.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
         jButtonLoadStatistics.setText("Προβολή αποθηκευμένων δεδομένων");
-        jButtonLoadStatistics.addAncestorListener(new javax.swing.event.AncestorListener() {
-            public void ancestorMoved(javax.swing.event.AncestorEvent evt) {
-            }
-            public void ancestorAdded(javax.swing.event.AncestorEvent evt) {
-                jButtonLoadStatisticsAncestorAdded(evt);
-            }
-            public void ancestorRemoved(javax.swing.event.AncestorEvent evt) {
-            }
-        });
         jButtonLoadStatistics.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonLoadStatisticsActionPerformed(evt);
@@ -760,10 +723,6 @@ public class R2screen extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jButtonSaveStatisticsActionPerformed
 
-    private void jButtonSaveStatisticsAncestorAdded(javax.swing.event.AncestorEvent evt) {//GEN-FIRST:event_jButtonSaveStatisticsAncestorAdded
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jButtonSaveStatisticsAncestorAdded
-
     private void jTextFieldDrawForDelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTextFieldDrawForDelMouseClicked
         jTextFieldDrawForDel.setText("");
     }//GEN-LAST:event_jTextFieldDrawForDelMouseClicked
@@ -800,8 +759,8 @@ public class R2screen extends javax.swing.JFrame {
     private void jButtonDeleteStatisticsRangeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDeleteStatisticsRangeActionPerformed
         String startDate = jTextFieldDrawStartRangeDel.getText();
         String endDate = jTextFieldDrawEndRangeDel.getText();
-        Date start = new Date();
-        Date end = new Date();
+        Date start;
+        Date end;
 
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
         sdf.setLenient(false);
@@ -822,10 +781,6 @@ public class R2screen extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Εισάγετε την ημερομηνία στη μορφή 15/01/2022 .");
         }
     }//GEN-LAST:event_jButtonDeleteStatisticsRangeActionPerformed
-
-    private void jButtonLoadStatisticsAncestorAdded(javax.swing.event.AncestorEvent evt) {//GEN-FIRST:event_jButtonLoadStatisticsAncestorAdded
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jButtonLoadStatisticsAncestorAdded
 
     private void jButtonLoadStatisticsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonLoadStatisticsActionPerformed
         sortPrizeC = true;

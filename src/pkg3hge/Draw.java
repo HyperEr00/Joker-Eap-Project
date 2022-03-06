@@ -6,11 +6,8 @@
 package pkg3hge;
 
 import java.io.Serializable;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
@@ -26,7 +23,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Draw.findAll", query = "SELECT d FROM Draw d")
     , @NamedQuery(name = "Draw.findById", query = "SELECT d FROM Draw d WHERE d.id = :id")
     , @NamedQuery(name = "Draw.findByDrawid", query = "SELECT d FROM Draw d WHERE d.drawid = :drawid")
-    , @NamedQuery(name = "Draw.findByDrawIdtime", query = "SELECT d FROM Draw d WHERE d.drawidtime = :drawidtime")        
+    , @NamedQuery(name = "Draw.findByDrawIdtime", query = "SELECT d FROM Draw d WHERE d.drawidtime = :drawidtime")
     , @NamedQuery(name = "Draw.findByFirstnumber", query = "SELECT d FROM Draw d WHERE d.firstnumber = :firstnumber")
     , @NamedQuery(name = "Draw.findBySecondnumber", query = "SELECT d FROM Draw d WHERE d.secondnumber = :secondnumber")
     , @NamedQuery(name = "Draw.findByThirdnumber", query = "SELECT d FROM Draw d WHERE d.thirdnumber = :thirdnumber")
@@ -173,22 +170,23 @@ public class Draw implements Serializable {
     public String toString() {
         return "pkg3hge.Draw[ id=" + id + " ]";
     }
-    
+
     public int getdistributedMoney() {
         double totalDistributed = 0;
         Collection<Prizecategory> prizeCat = getPrizecategoryCollection();
         for (Prizecategory pc : prizeCat) {
-            if ((pc.getIdcategory()== 1) || (pc.getIdcategory()== 2)) {
-                totalDistributed += pc.getDistributed() + pc.getJackpot();
+            if ((pc.getIdcategory() == 1) || (pc.getIdcategory() == 2)) {
+                totalDistributed = totalDistributed + pc.getDistributed() + pc.getJackpot();
+            } else {
+                totalDistributed += pc.getDistributed();
             }
         }
-        System.out.println(totalDistributed);
         return (int) totalDistributed;
     }
 
     public int getjackpots() {
         for (Prizecategory pc : prizecategoryCollection) {
-            if ((pc.getIdcategory()== 1) && (pc.getWinners() == 0)) {
+            if ((pc.getIdcategory() == 1) && (pc.getWinners() == 0)) {
                 return 1;
             }
         }
@@ -202,5 +200,5 @@ public class Draw implements Serializable {
         sdf.setTimeZone(TimeZone.getTimeZone("GMT+2"));
         return date;
     }
-    
+
 }
