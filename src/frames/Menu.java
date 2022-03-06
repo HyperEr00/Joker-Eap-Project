@@ -51,6 +51,7 @@ public class Menu extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new java.awt.Color(204, 204, 204));
+        setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         setName("frameMenu"); // NOI18N
         setUndecorated(true);
         setResizable(false);
@@ -85,7 +86,12 @@ public class Menu extends javax.swing.JFrame {
         });
 
         jButtonViewData.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
-        jButtonViewData.setText("Προβολή στατιστικών δεδομένων ΤΖΟΚΕΡ και εκτύπωση σε αρχείο pdf");
+        jButtonViewData.setText("Προβολή στατιστικών δεδομένων και εκτύπωση σε αρχείο pdf");
+        jButtonViewData.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonViewDataActionPerformed(evt);
+            }
+        });
 
         jButtonViewStatistics.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
         jButtonViewStatistics.setText("Προβολή δεδομένων ανά μήνα για συγκεκριμένο έτος");
@@ -97,11 +103,6 @@ public class Menu extends javax.swing.JFrame {
 
         jComboBoxGame.setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
         jComboBoxGame.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "TZOKER", "PRO-PO", "LOTTO", "PROTO", "SUPER 3", "EXTRA 5", "KINO", "PAME STOIXIMA", "POWERSPIN" }));
-        jComboBoxGame.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jComboBoxGameActionPerformed(evt);
-            }
-        });
 
         jLabelOpap.setIcon(new javax.swing.ImageIcon(getClass().getResource("/frames/images/opap.logo_20.png"))); // NOI18N
 
@@ -118,27 +119,26 @@ public class Menu extends javax.swing.JFrame {
             .addGroup(jPanelMenuLayout.createSequentialGroup()
                 .addGap(27, 27, 27)
                 .addComponent(jLabelOpap)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 672, Short.MAX_VALUE)
                 .addComponent(jLabelEap)
                 .addGap(59, 59, 59))
             .addGroup(jPanelMenuLayout.createSequentialGroup()
-                .addGap(394, 394, 394)
-                .addComponent(jLabelselect)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jComboBoxGame, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelMenuLayout.createSequentialGroup()
-                .addContainerGap(321, Short.MAX_VALUE)
+                .addGap(287, 287, 287)
                 .addGroup(jPanelMenuLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanelMenuLayout.createSequentialGroup()
+                        .addGap(73, 73, 73)
+                        .addComponent(jLabelselect)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jComboBoxGame, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 161, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelMenuLayout.createSequentialGroup()
                         .addComponent(menuTitle)
-                        .addGap(269, 269, 269))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelMenuLayout.createSequentialGroup()
-                        .addGroup(jPanelMenuLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jButtonViewData, javax.swing.GroupLayout.PREFERRED_SIZE, 625, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jButtonViewStatistics, javax.swing.GroupLayout.PREFERRED_SIZE, 625, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jButtonManageData, javax.swing.GroupLayout.PREFERRED_SIZE, 625, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(252, 252, 252))))
+                        .addGap(17, 17, 17))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelMenuLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(jButtonViewData, javax.swing.GroupLayout.PREFERRED_SIZE, 625, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jButtonViewStatistics, javax.swing.GroupLayout.PREFERRED_SIZE, 625, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jButtonManageData, javax.swing.GroupLayout.PREFERRED_SIZE, 625, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanelMenuLayout.setVerticalGroup(
             jPanelMenuLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -147,7 +147,7 @@ public class Menu extends javax.swing.JFrame {
                 .addGroup(jPanelMenuLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabelOpap)
                     .addComponent(jLabelEap))
-                .addGap(80, 80, 80)
+                .addGap(82, 82, 82)
                 .addComponent(menuTitle, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanelMenuLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -159,7 +159,7 @@ public class Menu extends javax.swing.JFrame {
                 .addComponent(jButtonViewStatistics)
                 .addGap(43, 43, 43)
                 .addComponent(jButtonViewData)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 208, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 197, Short.MAX_VALUE)
                 .addComponent(jButtonExit)
                 .addGap(20, 20, 20))
         );
@@ -183,10 +183,6 @@ public class Menu extends javax.swing.JFrame {
         System.exit(0);
     }//GEN-LAST:event_jButtonExitActionPerformed
 
-    private void jComboBoxGameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxGameActionPerformed
-           
-    }//GEN-LAST:event_jComboBoxGameActionPerformed
-
     private void jButtonManageDataActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonManageDataActionPerformed
                 String gameSelected = jComboBoxGame.getSelectedItem().toString();
         if("TZOKER".equals(gameSelected)){
@@ -206,6 +202,16 @@ public class Menu extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Το συγκεκριμένο παιχνίδι δεν υποστηρίζεται ακόμα, παρακαλώ επιλέξτε κάποιο άλλο. ");
         }
     }//GEN-LAST:event_jButtonViewStatisticsActionPerformed
+
+    private void jButtonViewDataActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonViewDataActionPerformed
+        String gameSelected = jComboBoxGame.getSelectedItem().toString();
+        if ("TZOKER".equals(gameSelected)) {
+            new R4screen().setVisible(true);
+            this.dispose();
+        } else {
+            JOptionPane.showMessageDialog(this, "Το συγκεκριμένο παιχνίδι δεν υποστηρίζεται ακόμα, παρακαλώ επιλέξτε κάποιο άλλο. ");
+        }
+    }//GEN-LAST:event_jButtonViewDataActionPerformed
 
     /**
      * @param args the command line arguments

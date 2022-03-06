@@ -24,7 +24,7 @@ import javax.xml.bind.annotation.XmlRootElement;
     , @NamedQuery(name = "Prizecategory.findByDivident", query = "SELECT p FROM Prizecategory p WHERE p.divident = :divident")
     , @NamedQuery(name = "Prizecategory.findByJackpot", query = "SELECT p FROM Prizecategory p WHERE p.jackpot = :jackpot")
     , @NamedQuery(name = "Prizecategory.findByWinners", query = "SELECT p FROM Prizecategory p WHERE p.winners = :winners")})
-public class Prizecategory implements Serializable {
+public class Prizecategory implements Serializable,Comparable<Prizecategory> {
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -61,7 +61,7 @@ public class Prizecategory implements Serializable {
         this.winners = winners;
         this.drawid = drawid;
     }
-    
+
     public Long getId() {
         return id;
     }
@@ -142,5 +142,16 @@ public class Prizecategory implements Serializable {
     public String toString() {
         return "pkg3hge.Prizecategory[ id=" + id + " ]";
     }
-    
+
+    @Override
+    public int compareTo(Prizecategory t) {
+        if(this.getIdcategory() < t.getIdcategory()){
+            return -1;
+        }else if(this.getIdcategory() > t.getIdcategory()){
+            return 1;
+        }else {
+            return 0;
+        }
+    }
+
 }

@@ -5,7 +5,7 @@
     <class>pkg3hge.Draw</class>
     <class>pkg3hge.Prizecategory</class>
     <properties>
-      <property name="javax.persistence.jdbc.url" value="jdbc:derby:C:\Users\kmel\Documents\NetBeansProjects\Java-Eap-Project\joker"/>
+      <property name="javax.persistence.jdbc.url" value="jdbc:derby:C:\Users\kosta\Documents\NetBeansProjects\3hGE\joker"/>
       <property name="javax.persistence.jdbc.user" value=""/>
       <property name="javax.persistence.jdbc.driver" value="org.apache.derby.jdbc.EmbeddedDriver"/>
       <property name="javax.persistence.jdbc.password" value=""/>

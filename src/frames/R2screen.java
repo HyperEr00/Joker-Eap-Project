@@ -27,70 +27,57 @@ public class R2screen extends javax.swing.JFrame {
     static EntityManagerFactory emf;
     static EntityManager em;
     Collection<Draw> drawsMain = new ArrayList<Draw>();
+    private static boolean sortPrizeC = false;
 
     public R2screen() {
         initComponents();
     }
-
-    private void drawTable1() {
-        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
-        DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
-        model.setRowCount(0);
-        int no = 1;
-        for (Draw draw : drawsMain) {
-            Object rowData[] = new Object[9];
-            rowData[0] = no;
-            rowData[1] = draw.getDrawid();
-            rowData[2] = draw.getFirstnumber();
-            rowData[3] = draw.getSecondnumber();
-            rowData[4] = draw.getThirdnumber();
-            rowData[5] = draw.getFourthnumber();
-            rowData[6] = draw.getFifthnumber();
-            rowData[7] = draw.getJoker();
-            rowData[8] = sdf.format(draw.getDrawidtime());
-            model.addRow(rowData);
-            no += 1;
-        }
+    
+    private static void createEMFandEM() {
+        emf = Persistence.createEntityManagerFactory("3hGEPU");
+        em = emf.createEntityManager();
     }
 
-    private void showDraw() {
+    private void showDraw() {           
         Draw draw = Controller.callDrawId(jTextFieldDrawSelection.getText());
-        drawsMain.add(draw);
-        drawTable1();
+        drawsMain.add(draw);                            
+        drawTable1();   
+        showWinnings(draw.getDrawid());
     }
 
     private void showRange(String dateRange) {
         drawsMain = Controller.callDateRange(dateRange);
         drawTable1();
+        String value = jTable1.getModel().getValueAt(0, 1).toString();
+        showWinnings(Integer.valueOf(value));
     }
 
     private void showWinnings(int number) {
         String[] catTzoker = {"5+1", "5", "4+1", "4", "3+1", "3", "2+1", "1+1"};
         DefaultTableModel model = (DefaultTableModel) jTable2.getModel();
         model.setRowCount(0);
-        int counter = 0;
+        int cat = 0;
         Object rowData[] = new Object[3];
         for (Draw draw : drawsMain) {
             if (draw.getDrawid() == number) {
                 Collection<Prizecategory> prizeCategories = draw.getPrizecategoryCollection();
+//                if(sortPrizeC){
+//                    Collections.sort(prizeCategories);
+//                }
                 for (Prizecategory pr : prizeCategories) {
-                    rowData[0] = catTzoker[counter];
+                    System.out.println(pr.getIdcategory());
+                    rowData[0] = catTzoker[cat];
                     rowData[1] = pr.getWinners();
                     if (pr.getDivident() == 0) {
                         rowData[2] = "ΤΖΑΚΠΟΤ";
                     } else {
                         rowData[2] = pr.getDivident();
                     }
-                    counter += 1;
+                    cat += 1;
                     model.addRow(rowData);
                 }
             }
-        }
-    }
-
-    private static void createEMFandEM() {
-        emf = Persistence.createEntityManagerFactory("3hGEPU");
-        em = emf.createEntityManager();
+        }sortPrizeC = false;
     }
 
     private static boolean findDraw(int drawID) {
@@ -116,6 +103,53 @@ public class R2screen extends javax.swing.JFrame {
         em.close();
         emf.close();
         return recordsWritted;
+    }
+    
+    private void drawTable1() {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+        DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
+        model.setRowCount(0);
+        int no = 1;
+        for (Draw draw : drawsMain) {
+            Object rowData[] = new Object[9];
+            rowData[0] = no;
+            rowData[1] = draw.getDrawid();
+            rowData[2] = draw.getFirstnumber();
+            rowData[3] = draw.getSecondnumber();
+            rowData[4] = draw.getThirdnumber();
+            rowData[5] = draw.getFourthnumber();
+            rowData[6] = draw.getFifthnumber();
+            rowData[7] = draw.getJoker();
+            rowData[8] = sdf.format(draw.getDrawidtime());
+            model.addRow(rowData);
+            no += 1;
+        }
+    }
+    
+    private void showAvailableData() {
+        createEMFandEM();
+        em.getTransaction().begin();
+        //Query query = em.createNamedQuery("Draw.findAll",Draw.class);
+        drawsMain.clear();
+        Query query = em.createNativeQuery("SELECT DISTINCT * FROM DRAW INNER JOIN PRIZECATEGORY ON PRIZECATEGORY.DRAWID = DRAW.DRAWID ORDER BY PRIZECATEGORY.IDCATEGORY",Draw.class);
+        drawsMain = query.getResultList();
+   //     drawTable1();
+        for (Draw draw : drawsMain) {
+            Collection<Prizecategory> pz = draw.getPrizecategoryCollection();
+            for (Prizecategory p : pz) {
+                System.out.println(p.getIdcategory());
+            }
+        }
+        
+        //("SELECT p FROM Prizecategory ORDER BY p.idcategory ASC")
+        
+      //  Collection<Prizecategory> pz = query.getResultList();
+//        for(Prizecategory p :pz ){
+//            System.out.println(p.getIdcategory());
+//        }
+ 
+        em.close();
+        emf.close();
     }
 
     private static int deleteDraw(int drawId) {
@@ -166,7 +200,7 @@ public class R2screen extends javax.swing.JFrame {
         emf.close();
         return recordsDeleted;
     }
-
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -187,6 +221,7 @@ public class R2screen extends javax.swing.JFrame {
         jScrollPane2 = new javax.swing.JScrollPane();
         jTable2 = new javax.swing.JTable();
         jButtonSaveStatistics = new javax.swing.JButton();
+        jButtonLoadStatistics = new javax.swing.JButton();
         jButtonViewStatistics = new javax.swing.JButton();
         jLabelInsertDrawRange = new javax.swing.JLabel();
         jTextFieldDrawStartRange = new javax.swing.JTextField();
@@ -202,6 +237,8 @@ public class R2screen extends javax.swing.JFrame {
         jTextFieldDrawEndRangeDel = new javax.swing.JTextField();
         jLabelInsertDrawRangeDel = new javax.swing.JLabel();
         jButtonDeleteStatisticsRange = new javax.swing.JButton();
+        menuTitle1 = new javax.swing.JLabel();
+        jLabel1 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setBackground(new java.awt.Color(204, 204, 204));
@@ -234,11 +271,6 @@ public class R2screen extends javax.swing.JFrame {
         jTextFieldDrawSelection.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jTextFieldDrawSelectionMouseClicked(evt);
-            }
-        });
-        jTextFieldDrawSelection.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextFieldDrawSelectionActionPerformed(evt);
             }
         });
 
@@ -319,11 +351,6 @@ public class R2screen extends javax.swing.JFrame {
         jTable2.setRowHeight(24);
         jTable2.setSelectionBackground(new java.awt.Color(51, 153, 255));
         jTable2.getTableHeader().setReorderingAllowed(false);
-        jTable2.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                jTable2MouseClicked(evt);
-            }
-        });
         jScrollPane2.setViewportView(jTable2);
         if (jTable2.getColumnModel().getColumnCount() > 0) {
             jTable2.getColumnModel().getColumn(0).setMinWidth(60);
@@ -331,6 +358,7 @@ public class R2screen extends javax.swing.JFrame {
             jTable2.getColumnModel().getColumn(0).setMaxWidth(60);
         }
 
+        jButtonSaveStatistics.setBackground(new java.awt.Color(146, 202, 142));
         jButtonSaveStatistics.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
         jButtonSaveStatistics.setText("Αποθήκευση δεδομένων");
         jButtonSaveStatistics.addAncestorListener(new javax.swing.event.AncestorListener() {
@@ -348,20 +376,38 @@ public class R2screen extends javax.swing.JFrame {
             }
         });
 
+        jButtonLoadStatistics.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
+        jButtonLoadStatistics.setText("Προβολή αποθηκευμένων δεδομένων");
+        jButtonLoadStatistics.addAncestorListener(new javax.swing.event.AncestorListener() {
+            public void ancestorMoved(javax.swing.event.AncestorEvent evt) {
+            }
+            public void ancestorAdded(javax.swing.event.AncestorEvent evt) {
+                jButtonLoadStatisticsAncestorAdded(evt);
+            }
+            public void ancestorRemoved(javax.swing.event.AncestorEvent evt) {
+            }
+        });
+        jButtonLoadStatistics.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonLoadStatisticsActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanelR2TablesLayout = new javax.swing.GroupLayout(jPanelR2Tables);
         jPanelR2Tables.setLayout(jPanelR2TablesLayout);
         jPanelR2TablesLayout.setHorizontalGroup(
             jPanelR2TablesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanelR2TablesLayout.createSequentialGroup()
-                .addGap(413, 413, 413)
+                .addGap(125, 125, 125)
                 .addComponent(jButtonSaveStatistics)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jButtonLoadStatistics)
+                .addGap(98, 98, 98))
             .addGroup(jPanelR2TablesLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 664, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 400, Short.MAX_VALUE)
-                .addContainerGap())
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 418, Short.MAX_VALUE))
         );
         jPanelR2TablesLayout.setVerticalGroup(
             jPanelR2TablesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -370,9 +416,11 @@ public class R2screen extends javax.swing.JFrame {
                 .addGroup(jPanelR2TablesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 328, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 221, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addComponent(jButtonSaveStatistics)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanelR2TablesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jButtonSaveStatistics)
+                    .addComponent(jButtonLoadStatistics))
+                .addContainerGap(12, Short.MAX_VALUE))
         );
 
         jButtonViewStatistics.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
@@ -394,11 +442,6 @@ public class R2screen extends javax.swing.JFrame {
                 jTextFieldDrawStartRangeMouseClicked(evt);
             }
         });
-        jTextFieldDrawStartRange.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextFieldDrawStartRangeActionPerformed(evt);
-            }
-        });
 
         jTextFieldDrawEndRange.setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
         jTextFieldDrawEndRange.setText("30-01-2022");
@@ -406,11 +449,6 @@ public class R2screen extends javax.swing.JFrame {
         jTextFieldDrawEndRange.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jTextFieldDrawEndRangeMouseClicked(evt);
-            }
-        });
-        jTextFieldDrawEndRange.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextFieldDrawEndRangeActionPerformed(evt);
             }
         });
 
@@ -439,13 +477,10 @@ public class R2screen extends javax.swing.JFrame {
                 jTextFieldDrawForDelMouseClicked(evt);
             }
         });
-        jTextFieldDrawForDel.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextFieldDrawForDelActionPerformed(evt);
-            }
-        });
 
+        jButtonDeleteStatistics.setBackground(new java.awt.Color(204, 133, 133));
         jButtonDeleteStatistics.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
+        jButtonDeleteStatistics.setForeground(new java.awt.Color(255, 255, 255));
         jButtonDeleteStatistics.setText("Διαγραφή κλήρωσης");
         jButtonDeleteStatistics.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -461,11 +496,6 @@ public class R2screen extends javax.swing.JFrame {
                 jTextFieldDrawStartRangeDelMouseClicked(evt);
             }
         });
-        jTextFieldDrawStartRangeDel.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextFieldDrawStartRangeDelActionPerformed(evt);
-            }
-        });
 
         jLabelInsertDrawRange3.setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
         jLabelInsertDrawRange3.setText("έως");
@@ -478,22 +508,23 @@ public class R2screen extends javax.swing.JFrame {
                 jTextFieldDrawEndRangeDelMouseClicked(evt);
             }
         });
-        jTextFieldDrawEndRangeDel.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextFieldDrawEndRangeDelActionPerformed(evt);
-            }
-        });
 
         jLabelInsertDrawRangeDel.setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
         jLabelInsertDrawRangeDel.setText("Εισάγετε τον εύρος ημερομηνιών : ");
 
+        jButtonDeleteStatisticsRange.setBackground(new java.awt.Color(204, 133, 133));
         jButtonDeleteStatisticsRange.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
+        jButtonDeleteStatisticsRange.setForeground(new java.awt.Color(255, 255, 255));
         jButtonDeleteStatisticsRange.setText("Διαγραφή κληρώσεων");
         jButtonDeleteStatisticsRange.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonDeleteStatisticsRangeActionPerformed(evt);
             }
         });
+
+        menuTitle1.setBackground(new java.awt.Color(204, 204, 204));
+        menuTitle1.setFont(new java.awt.Font("Arial", 1, 24)); // NOI18N
+        menuTitle1.setText("Διαγραφή δεδομένων");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -509,23 +540,29 @@ public class R2screen extends javax.swing.JFrame {
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(139, 139, 139)
                         .addComponent(jButtonDeleteStatistics)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 84, Short.MAX_VALUE)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jButtonDeleteStatisticsRange)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabelInsertDrawRangeDel)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jTextFieldDrawStartRangeDel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jLabelInsertDrawRange3))
-                    .addComponent(jButtonDeleteStatisticsRange))
+                        .addComponent(jLabelInsertDrawRange3)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jTextFieldDrawEndRangeDel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(53, 53, 53))
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(426, 426, 426)
+                .addComponent(menuTitle1)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(35, 35, 35)
+                .addContainerGap()
+                .addComponent(menuTitle1, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -541,8 +578,10 @@ public class R2screen extends javax.swing.JFrame {
                             .addComponent(jTextFieldDrawForDel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(18, 18, 18)
                         .addComponent(jButtonDeleteStatistics)))
-                .addContainerGap(42, Short.MAX_VALUE))
+                .addContainerGap(15, Short.MAX_VALUE))
         );
+
+        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/frames/images/tzoker-logo_1_30.png"))); // NOI18N
 
         javax.swing.GroupLayout jPanelR2Layout = new javax.swing.GroupLayout(jPanelR2);
         jPanelR2.setLayout(jPanelR2Layout);
@@ -555,7 +594,9 @@ public class R2screen extends javax.swing.JFrame {
             .addGroup(jPanelR2Layout.createSequentialGroup()
                 .addGroup(jPanelR2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanelR2Layout.createSequentialGroup()
-                        .addGap(418, 418, 418)
+                        .addGap(30, 30, 30)
+                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 134, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(254, 254, 254)
                         .addComponent(menuTitle))
                     .addGroup(jPanelR2Layout.createSequentialGroup()
                         .addGroup(jPanelR2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
@@ -587,9 +628,12 @@ public class R2screen extends javax.swing.JFrame {
         jPanelR2Layout.setVerticalGroup(
             jPanelR2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanelR2Layout.createSequentialGroup()
-                .addGap(20, 20, 20)
-                .addComponent(menuTitle, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(25, 25, 25)
+                .addGroup(jPanelR2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanelR2Layout.createSequentialGroup()
+                        .addGap(20, 20, 20)
+                        .addComponent(menuTitle, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(8, 8, 8)
                 .addGroup(jPanelR2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabelInsertDraw)
                     .addComponent(jTextFieldDrawSelection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -636,6 +680,7 @@ public class R2screen extends javax.swing.JFrame {
     }//GEN-LAST:event_jTextFieldDrawSelectionMouseClicked
 
     private void jButtonViewStatisticsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonViewStatisticsActionPerformed
+        sortPrizeC = false;
         drawsMain.clear();
         try {
             int drawSelected = Integer.parseInt(jTextFieldDrawSelection.getText());
@@ -657,10 +702,6 @@ public class R2screen extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jButtonViewStatisticsActionPerformed
 
-    private void jTextFieldDrawSelectionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextFieldDrawSelectionActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jTextFieldDrawSelectionActionPerformed
-
     private void jTable1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable1MouseClicked
         JTable source = (JTable) evt.getSource();
         int column = 1;
@@ -669,29 +710,16 @@ public class R2screen extends javax.swing.JFrame {
         showWinnings(Integer.valueOf(value));
     }//GEN-LAST:event_jTable1MouseClicked
 
-    private void jTable2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable2MouseClicked
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jTable2MouseClicked
-
     private void jTextFieldDrawStartRangeMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTextFieldDrawStartRangeMouseClicked
         jTextFieldDrawStartRange.setText("");
-        jTextFieldDrawEndRange.setText("");
     }//GEN-LAST:event_jTextFieldDrawStartRangeMouseClicked
 
-    private void jTextFieldDrawStartRangeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextFieldDrawStartRangeActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jTextFieldDrawStartRangeActionPerformed
-
     private void jTextFieldDrawEndRangeMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTextFieldDrawEndRangeMouseClicked
-        jTextFieldDrawStartRange.setText("");
         jTextFieldDrawEndRange.setText("");
     }//GEN-LAST:event_jTextFieldDrawEndRangeMouseClicked
 
-    private void jTextFieldDrawEndRangeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextFieldDrawEndRangeActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jTextFieldDrawEndRangeActionPerformed
-
     private void jButtonViewStatisticsRangeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonViewStatisticsRangeActionPerformed
+        sortPrizeC = false;
         drawsMain.clear();
         String startDate = jTextFieldDrawStartRange.getText();
         String endDate = jTextFieldDrawEndRange.getText();
@@ -740,12 +768,7 @@ public class R2screen extends javax.swing.JFrame {
         jTextFieldDrawForDel.setText("");
     }//GEN-LAST:event_jTextFieldDrawForDelMouseClicked
 
-    private void jTextFieldDrawForDelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextFieldDrawForDelActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jTextFieldDrawForDelActionPerformed
-
     private void jButtonDeleteStatisticsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDeleteStatisticsActionPerformed
-        JDialog.setDefaultLookAndFeelDecorated(true);
         int response = JOptionPane.showConfirmDialog(null, "Θέλετε να προχωρήσετε σε διαγραφή;", "Επιβεβαίωση", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
         if (response == JOptionPane.YES_OPTION) {
 
@@ -769,18 +792,10 @@ public class R2screen extends javax.swing.JFrame {
         jTextFieldDrawEndRangeDel.setText("");
     }//GEN-LAST:event_jTextFieldDrawStartRangeDelMouseClicked
 
-    private void jTextFieldDrawStartRangeDelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextFieldDrawStartRangeDelActionPerformed
-
-    }//GEN-LAST:event_jTextFieldDrawStartRangeDelActionPerformed
-
     private void jTextFieldDrawEndRangeDelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTextFieldDrawEndRangeDelMouseClicked
         jTextFieldDrawStartRangeDel.setText("");
         jTextFieldDrawEndRangeDel.setText("");
     }//GEN-LAST:event_jTextFieldDrawEndRangeDelMouseClicked
-
-    private void jTextFieldDrawEndRangeDelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextFieldDrawEndRangeDelActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jTextFieldDrawEndRangeDelActionPerformed
 
     private void jButtonDeleteStatisticsRangeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDeleteStatisticsRangeActionPerformed
         String startDate = jTextFieldDrawStartRangeDel.getText();
@@ -793,7 +808,6 @@ public class R2screen extends javax.swing.JFrame {
         try {
             start = sdf.parse(startDate);
             end = sdf.parse(endDate);
-            JDialog.setDefaultLookAndFeelDecorated(true);
             int response = JOptionPane.showConfirmDialog(null, "Θέλετε να προχωρήσετε σε διαγραφή;", "Επιβεβαίωση", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
             if (response == JOptionPane.YES_OPTION) {
 
@@ -808,6 +822,15 @@ public class R2screen extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Εισάγετε την ημερομηνία στη μορφή 15/01/2022 .");
         }
     }//GEN-LAST:event_jButtonDeleteStatisticsRangeActionPerformed
+
+    private void jButtonLoadStatisticsAncestorAdded(javax.swing.event.AncestorEvent evt) {//GEN-FIRST:event_jButtonLoadStatisticsAncestorAdded
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButtonLoadStatisticsAncestorAdded
+
+    private void jButtonLoadStatisticsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonLoadStatisticsActionPerformed
+        sortPrizeC = true;
+        showAvailableData();
+    }//GEN-LAST:event_jButtonLoadStatisticsActionPerformed
 
     /**
      * @param args the command line arguments
@@ -853,9 +876,11 @@ public class R2screen extends javax.swing.JFrame {
     private javax.swing.JButton jButtonDeleteStatistics;
     private javax.swing.JButton jButtonDeleteStatisticsRange;
     private javax.swing.JButton jButtonExit;
+    private javax.swing.JButton jButtonLoadStatistics;
     private javax.swing.JButton jButtonSaveStatistics;
     private javax.swing.JButton jButtonViewStatistics;
     private javax.swing.JButton jButtonViewStatisticsRange;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabelInsertDraw;
     private javax.swing.JLabel jLabelInsertDrawForDel;
     private javax.swing.JLabel jLabelInsertDrawRange;
@@ -876,5 +901,6 @@ public class R2screen extends javax.swing.JFrame {
     private javax.swing.JTextField jTextFieldDrawStartRange;
     private javax.swing.JTextField jTextFieldDrawStartRangeDel;
     private javax.swing.JLabel menuTitle;
+    private javax.swing.JLabel menuTitle1;
     // End of variables declaration//GEN-END:variables
 }
