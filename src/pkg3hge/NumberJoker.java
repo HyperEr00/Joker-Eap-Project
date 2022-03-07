@@ -9,7 +9,7 @@ package pkg3hge;
  *
  * @author Hyperer
  */
-public class NumberJoker {
+public class NumberJoker implements Comparable<NumberJoker>{
 
     private int number;
     private int occurrence;
@@ -43,5 +43,14 @@ public class NumberJoker {
 
     public void setDelays(int delays) {
         this.delays = delays;
+    }
+
+    @Override
+    public int compareTo(NumberJoker t) {
+        if(this.occurrence > t.occurrence) { return -1;}
+        else if(this.occurrence < t.occurrence) { return 1;}
+        else {
+            return 0;
+        }
     }
 }

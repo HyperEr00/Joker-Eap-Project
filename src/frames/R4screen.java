@@ -30,8 +30,12 @@ import com.itextpdf.text.pdf.security.LtvTimestamp;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.security.Timestamp;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import pkg3hge.Prizecategory;
 
 /**
  *
@@ -41,6 +45,9 @@ public class R4screen extends javax.swing.JFrame {
 
     static EntityManagerFactory emf;
     static EntityManager em;
+    static ArrayList<NumberJoker> numbers = new ArrayList<>();
+    static ArrayList<NumberJoker> jokers = new ArrayList<>();
+    static List<Draw> selectedDraws = new ArrayList<>();
 
     /**
      * Creates new form Menu
@@ -60,8 +67,8 @@ public class R4screen extends javax.swing.JFrame {
         int jokerOccurences;
         int numberDelays;
         int jokerDelays;
-        ArrayList<NumberJoker> numbers = new ArrayList<>();
-        ArrayList<NumberJoker> jokers = new ArrayList<>();
+        numbers.clear();
+        jokers.clear();
 
         for (int i = 1; i <= 45; i++) {
             numberDelays = 0;
@@ -95,19 +102,18 @@ public class R4screen extends javax.swing.JFrame {
     }
 
     private void getAllStats() {
+        selectedDraws.clear();
         createEMFandEM();
         em.getTransaction().begin();
         Query query = em.createNamedQuery("Draw.findAll", Draw.class);
-        List<Draw> draws = query.getResultList();
+        selectedDraws = query.getResultList();
         em.close();
         emf.close();
-        showStatistics(draws);
+        showStatistics(selectedDraws);
     }
 
     private void getRangeStats(Date start, Date end) {
-        List<Draw> selectedDraws = new ArrayList<>();
-        System.out.println(start);
-        System.out.println(end);
+        selectedDraws.clear();
 
         createEMFandEM();
         em.getTransaction().begin();
@@ -118,13 +124,11 @@ public class R4screen extends javax.swing.JFrame {
         for (Draw draw : draws) {
             if ((draw.getDrawidtime().before(end) && draw.getDrawidtime().after(start)) || draw.getDrawidtime().equals(start) || draw.getDrawidtime().equals(end)) {
                 selectedDraws.add(draw);
-                System.out.println(draw.getDrawid());
             }
         }
         if (selectedDraws.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Δεν υπάρχουν δεδομένα για στατιστικά σ' αυτό το εύρος ημερομηνιών");
         }
-
         showStatistics(selectedDraws);
     }
 
@@ -174,7 +178,7 @@ public class R4screen extends javax.swing.JFrame {
                 }
             }
             document.add(pdftable);
-            document.add(Chunk.NEXTPAGE);
+            document.add(Chunk.NEWLINE);
             PdfPTable pdftable2 = new PdfPTable(jTable2.getColumnCount());
             document.add(new Paragraph("Joker Numbers Statistics:"));
             document.add(Chunk.NEWLINE);
@@ -221,6 +225,9 @@ public class R4screen extends javax.swing.JFrame {
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
+        jButtonJokerFreq = new javax.swing.JButton();
+        jButtonNumbersFreq = new javax.swing.JButton();
+        jButtonPrizesAverage = new javax.swing.JButton();
         jLabel2 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -348,6 +355,30 @@ public class R4screen extends javax.swing.JFrame {
             }
         });
 
+        jButtonJokerFreq.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
+        jButtonJokerFreq.setText("Συχότητα εμφάνισης αριθμών Joker");
+        jButtonJokerFreq.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonJokerFreqActionPerformed(evt);
+            }
+        });
+
+        jButtonNumbersFreq.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
+        jButtonNumbersFreq.setText("Συχότητα εμφάνισης αριθμών");
+        jButtonNumbersFreq.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonNumbersFreqActionPerformed(evt);
+            }
+        });
+
+        jButtonPrizesAverage.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
+        jButtonPrizesAverage.setText("Μέσος όρος κερδών ανά κατηγορία");
+        jButtonPrizesAverage.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonPrizesAverageActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -365,7 +396,11 @@ public class R4screen extends javax.swing.JFrame {
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 253, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(18, 18, 18)
-                                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 252, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 252, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(75, 75, 75)
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jButtonJokerFreq, javax.swing.GroupLayout.PREFERRED_SIZE, 361, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jButtonPrizesAverage, javax.swing.GroupLayout.PREFERRED_SIZE, 361, javax.swing.GroupLayout.PREFERRED_SIZE)))))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(280, 280, 280)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -386,7 +421,12 @@ public class R4screen extends javax.swing.JFrame {
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(195, 195, 195)
                         .addComponent(jButton3)))
-                .addContainerGap(513, Short.MAX_VALUE))
+                .addContainerGap(95, Short.MAX_VALUE))
+            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                    .addContainerGap(621, Short.MAX_VALUE)
+                    .addComponent(jButtonNumbersFreq, javax.swing.GroupLayout.PREFERRED_SIZE, 361, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGap(92, 92, 92)))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -395,10 +435,17 @@ public class R4screen extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabelInsertDraw)
                     .addComponent(jLabelInsertDraw1))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 472, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 472, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 472, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 472, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(230, 230, 230)
+                        .addComponent(jButtonJokerFreq, javax.swing.GroupLayout.PREFERRED_SIZE, 69, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(40, 40, 40)
+                        .addComponent(jButtonPrizesAverage, javax.swing.GroupLayout.PREFERRED_SIZE, 69, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabelInsertDrawRange)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -412,6 +459,11 @@ public class R4screen extends javax.swing.JFrame {
                     .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButton3))
+            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel1Layout.createSequentialGroup()
+                    .addGap(160, 160, 160)
+                    .addComponent(jButtonNumbersFreq, javax.swing.GroupLayout.PREFERRED_SIZE, 69, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addContainerGap(432, Short.MAX_VALUE)))
         );
 
         jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/frames/images/tzoker-logo_1_30.png"))); // NOI18N
@@ -508,6 +560,46 @@ public class R4screen extends javax.swing.JFrame {
         printPdf();
     }//GEN-LAST:event_jButton3ActionPerformed
 
+    private void jButtonJokerFreqActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonJokerFreqActionPerformed
+        Collections.sort(jokers);
+        for(NumberJoker n : jokers){
+            System.out.println(n.getNumber()+"       "+n.getOccurrence());
+        }
+    }//GEN-LAST:event_jButtonJokerFreqActionPerformed
+
+    private void jButtonNumbersFreqActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonNumbersFreqActionPerformed
+        Collections.sort(numbers);
+    }//GEN-LAST:event_jButtonNumbersFreqActionPerformed
+
+    private void jButtonPrizesAverageActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonPrizesAverageActionPerformed
+        Map<Integer,Integer> pz = new HashMap<Integer, Integer>();
+        int totalMoney;
+        int totalDraws;
+        
+        for(int i=1; i <= 8; i++){
+            totalMoney = 0;
+            totalDraws = 0;
+        for(Draw d : selectedDraws){
+            for(Prizecategory p : d.getPrizecategoryCollection()){
+                if(p.getIdcategory() == i){
+                   totalMoney += p.getDistributed();
+                }
+            }
+            totalDraws += 1;
+        }
+        
+        pz.put(i, totalMoney / totalDraws );
+        }
+        for (Map.Entry<Integer, Integer> me :
+             pz.entrySet()) {
+ 
+            // Printing keys
+            System.out.print(me.getKey() + ":");
+            System.out.println(me.getValue());
+        
+        }
+    }//GEN-LAST:event_jButtonPrizesAverageActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -535,6 +627,9 @@ public class R4screen extends javax.swing.JFrame {
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButtonExit;
+    private javax.swing.JButton jButtonJokerFreq;
+    private javax.swing.JButton jButtonNumbersFreq;
+    private javax.swing.JButton jButtonPrizesAverage;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabelInsertDraw;
     private javax.swing.JLabel jLabelInsertDraw1;
