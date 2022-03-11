@@ -5,15 +5,11 @@
  */
 package frames;
 
-
-
 import javax.swing.JOptionPane;
-
-
 
 /**
  *
- * @author Hyperer
+ * @author Konstantinos Meliras, Konstantinos Kontovas, Stamatis Asterios
  */
 public class Menu extends javax.swing.JFrame {
 
@@ -107,16 +103,6 @@ public class Menu extends javax.swing.JFrame {
         jPanelMenu.setLayout(jPanelMenuLayout);
         jPanelMenuLayout.setHorizontalGroup(
             jPanelMenuLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelMenuLayout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
-                .addComponent(jButtonExit)
-                .addGap(40, 40, 40))
-            .addGroup(jPanelMenuLayout.createSequentialGroup()
-                .addGap(27, 27, 27)
-                .addComponent(jLabelOpap)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 672, Short.MAX_VALUE)
-                .addComponent(jLabelEap)
-                .addGap(59, 59, 59))
             .addGroup(jPanelMenuLayout.createSequentialGroup()
                 .addGap(287, 287, 287)
                 .addGroup(jPanelMenuLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -134,6 +120,18 @@ public class Menu extends javax.swing.JFrame {
                         .addComponent(jButtonViewStatistics, javax.swing.GroupLayout.PREFERRED_SIZE, 625, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jButtonManageData, javax.swing.GroupLayout.PREFERRED_SIZE, 625, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(jPanelMenuLayout.createSequentialGroup()
+                .addGap(27, 27, 27)
+                .addGroup(jPanelMenuLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanelMenuLayout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(jButtonExit)
+                        .addGap(40, 40, 40))
+                    .addGroup(jPanelMenuLayout.createSequentialGroup()
+                        .addComponent(jLabelOpap)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 672, Short.MAX_VALUE)
+                        .addComponent(jLabelEap)
+                        .addGap(59, 59, 59))))
         );
         jPanelMenuLayout.setVerticalGroup(
             jPanelMenuLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -173,38 +171,40 @@ public class Menu extends javax.swing.JFrame {
         pack();
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
-
+    
+    //method to check get text from select item in combo box
+    private boolean checkGame(){
+        String gameSelected = jComboBoxGame.getSelectedItem().toString();   
+        if ("TZOKER".equals(gameSelected)) {                                //check if match with TZOKER if does then return true
+            return true;                                                   
+        } else {
+            JOptionPane.showMessageDialog(this, "Το συγκεκριμένο παιχνίδι δεν υποστηρίζεται ακόμα, παρακαλώ επιλέξτε κάποιο άλλο. ");
+            return false;                                                   //else show up warning that cant choose and return false
+        }
+    }
+        
     private void jButtonExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonExitActionPerformed
-        System.exit(0);
+        System.exit(0);     //exit button performs system exit
     }//GEN-LAST:event_jButtonExitActionPerformed
 
     private void jButtonManageDataActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonManageDataActionPerformed
-                String gameSelected = jComboBoxGame.getSelectedItem().toString();
-        if("TZOKER".equals(gameSelected)){
-            new R2screen().setVisible(true);
+        if (checkGame()) {
+            new R2screen().setVisible(true);                                //check and open new screen R2 and close menu
             this.dispose();
-        } else {
-            JOptionPane.showMessageDialog(this, "Το συγκεκριμένο παιχνίδι δεν υποστηρίζεται ακόμα, παρακαλώ επιλέξτε κάποιο άλλο. ");
         }
     }//GEN-LAST:event_jButtonManageDataActionPerformed
 
     private void jButtonViewStatisticsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonViewStatisticsActionPerformed
-                String gameSelected = jComboBoxGame.getSelectedItem().toString();
-        if("TZOKER".equals(gameSelected)){
-            new R3screen().setVisible(true);
+        if (checkGame()) {
+            new R3screen().setVisible(true);                                //check and open new screen R3 and close menu
             this.dispose();
-        } else {
-            JOptionPane.showMessageDialog(this, "Το συγκεκριμένο παιχνίδι δεν υποστηρίζεται ακόμα, παρακαλώ επιλέξτε κάποιο άλλο. ");
         }
     }//GEN-LAST:event_jButtonViewStatisticsActionPerformed
 
     private void jButtonViewDataActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonViewDataActionPerformed
-        String gameSelected = jComboBoxGame.getSelectedItem().toString();
-        if ("TZOKER".equals(gameSelected)) {
-            new R4screen().setVisible(true);
+        if (checkGame()) {
+            new R4screen().setVisible(true);                                //check and open new screen R4 and close menu
             this.dispose();
-        } else {
-            JOptionPane.showMessageDialog(this, "Το συγκεκριμένο παιχνίδι δεν υποστηρίζεται ακόμα, παρακαλώ επιλέξτε κάποιο άλλο. ");
         }
     }//GEN-LAST:event_jButtonViewDataActionPerformed
 

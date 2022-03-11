@@ -5,6 +5,7 @@
  */
 package frames;
 
+import java.awt.Color;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -17,169 +18,169 @@ import pkg3hge.Prizecategory;
 
 /**
  *
- * @author Hyperer
+ * @author Konstantinos Meliras, Konstantinos Kontovas, Stamatis Asterios
  */
 public class R2screen extends javax.swing.JFrame {
-
+    private static EntityManagerFactory emf;        
+    private static EntityManager em;
+    private static Collection<Draw> drawsMain = new ArrayList<Draw>();     //list to save and retrieve draws    
+       
     /**
      * Creates new form Menu
      */
-    static EntityManagerFactory emf;
-    static EntityManager em;
-    Collection<Draw> drawsMain = new ArrayList<Draw>();
-    private static boolean sortPrizeC = false;
 
     public R2screen() {
         initComponents();
+        try {
+            jDateChooserDrawStartRange.setDate(new SimpleDateFormat("dd-MM-yyyy").parse("01-01-2022"));   //set a default date to the start range date field
+            jDateChooserDrawEndRange.setDate(new SimpleDateFormat("dd-MM-yyyy").parse("15-01-2022"));     //set a default date to the end range  date field
+            jDateChooserDrawStartRangeDel.setDate(new SimpleDateFormat("dd-MM-yyyy").parse("01-01-2022"));   //set a default date to the start range date delete field
+            jDateChooseDrawEndRangeDel.setDate(new SimpleDateFormat("dd-MM-yyyy").parse("15-01-2022"));     //set a default date to the end range date delete field
+        } catch (ParseException ex) {
+            System.out.println(ex);
+        }
     }
     
-    private static void createEMFandEM() {
+    //method to create Entity Manager and Factory to use for Database connection
+    private static void createEMFandEM() {               
         emf = Persistence.createEntityManagerFactory("3hGEPU");
         em = emf.createEntityManager();
     }
-
+    
+    //method to show each draw
     private void showDraw() {           
-        Draw draw = Controller.callDrawId(jTextFieldDrawSelection.getText());
-        drawsMain.add(draw);                            
-        drawTable1();   
-        showWinnings(draw.getDrawid());
+        Draw draw = Controller.callDrawId(jTextFieldDrawSelection.getText());   //call the api to get the draw with the current typed drawid 
+        drawsMain.add(draw);                                                    //save draw to list          
+        drawTable1();                                                           //call nethod drawtable to show draw in table 1
+        showWinnings(draw.getDrawid());                                         //call method showWinnings to show the Prize categories for the draw
     }
-
-    private void showRange(String dateRange) {
-        drawsMain = Controller.callDateRange(dateRange);
-        drawTable1();
-        String value = jTable1.getModel().getValueAt(0, 1).toString();
-        showWinnings(Integer.valueOf(value));
+    
+    //methos to show a range of draws
+    private void showRange(String dateRange) {  
+        drawsMain = Controller.callDateRange(dateRange);                        //call the api to get the draw list and append it to drawsMain
+        drawTable1();                                                           //call nethod drawtable to show draw in table 1
+        String value = jTable1.getModel().getValueAt(0, 1).toString();          //get the first draw number
+        showWinnings(Integer.valueOf(value));                                   //call method showWinnings to show the Prize categories for the first draw
     }
-
+    
+    //method to show each draw to table 1
+    private void drawTable1() {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");      //format date to greek 
+        DefaultTableModel model = (DefaultTableModel) jTable1.getModel();   //create table 1
+        model.setRowCount(0);                                           //set the initial row number
+        int no = 1;                                                     //set the stard of table index
+        for (Draw draw : drawsMain) {                                   //itarate drawMain list
+            Object rowData[] = new Object[9];                           //number of table columns - 9
+            rowData[0] = no;                                            //index number
+            rowData[1] = draw.getDrawid();                              //draw id 
+            rowData[2] = draw.getFirstnumber();                         //first winning number 
+            rowData[3] = draw.getSecondnumber();                        //second winning number
+            rowData[4] = draw.getThirdnumber();                         //third winning number   
+            rowData[5] = draw.getFourthnumber();                        //fourth winning number
+            rowData[6] = draw.getFifthnumber();                         //fifth winning number
+            rowData[7] = draw.getJoker();                               //joker number
+            rowData[8] = sdf.format(draw.getDrawidtime());              //date of draw
+            model.addRow(rowData);                                      //insert row to the table 1
+            no += 1;                                                    //point index number to next
+        }
+    }
+    
+    //method to show the prize categories winnings to table 2 by getting the draw id number
     private void showWinnings(int number) {
-        String[] catTzoker = {"5+1", "5", "4+1", "4", "3+1", "3", "2+1", "1+1"};
-        DefaultTableModel model = (DefaultTableModel) jTable2.getModel();
-        model.setRowCount(0);
-        int cat = 0;
-        Object rowData[] = new Object[3];
-        for (Draw draw : drawsMain) {
-            if (draw.getDrawid() == number) {
+        String[] catTzoker = {"5+1", "5", "4+1", "4", "3+1", "3", "2+1", "1+1"};        //create array for each prize category name 
+        DefaultTableModel model = (DefaultTableModel) jTable2.getModel();               //create table 2 
+        model.setRowCount(0);                                                           //set the initial row number
+        int cat = 0;                                                                    //variable for category number
+        Object rowData[] = new Object[3];                                               //number of table columns - 3
+        for (Draw draw : drawsMain) {                                                   //itarate drawMain list
+            if (draw.getDrawid() == number) {                                           //check if drawid match with given number
                 Collection<Prizecategory> prizeCategories = draw.getPrizecategoryCollection();
-                for (Prizecategory pr : prizeCategories) {
-                    System.out.println(pr.getIdcategory());
-                    rowData[0] = catTzoker[cat];
-                    rowData[1] = pr.getWinners();
-                    if (pr.getDivident() == 0) {
-                        rowData[2] = "ΤΖΑΚΠΟΤ";
-                    } else {
-                        rowData[2] = pr.getDivident();
+                for (int i = 1; i <= 8; i++) {
+                    for (Prizecategory pr : prizeCategories) {
+                        if (pr.getIdcategory() == i) {
+                            rowData[0] = catTzoker[cat];                                 //first column get category name from the array we created
+                            rowData[1] = pr.getWinners();                                //second column get the prize category winners
+                            if (pr.getWinners() == 0) {                                  //check if there are winners 
+                                rowData[2] = "ΤΖΑΚΠΟΤ";                                  //if no print jackpot
+                            } else {                                                     //else print the dividents
+                                rowData[2] = pr.getDivident();
+                            }
+                            cat += 1;                                                    //change category for next loop
+                            model.addRow(rowData);                                       //add the row to the table
+                        }
                     }
-                    cat += 1;
-                    model.addRow(rowData);
                 }
             }
-        }sortPrizeC = false;
-    }
-
-    private static boolean findDraw(int drawID) {
-        Query query = em.createNamedQuery("Draw.findAll", Draw.class);
-        List<Draw> draws = query.getResultList();
-        for (Draw draw : draws) {
-            if (draw.getDrawid().equals(drawID)) {
-                return true;
-            }
         }
-        return false;
     }
 
+    //method to insert draw to database
     private static int insertDraw(Draw draw) {
-        int recordsWritted = 0;
-        createEMFandEM();
-        em.getTransaction().begin();
-        if (!findDraw(draw.getDrawid())) {
-            em.persist(draw);
-            recordsWritted += 1;
+        int recordsWritted = 0;                                                          //variable to record how many draws have writted to databes 
+        createEMFandEM();                                                                //call method to create manager and factory
+        em.getTransaction().begin();                                                     //database connection
+        Query query = em.createNamedQuery("Draw.findByDrawid", Draw.class);              //if exist call query with the parameter of drawid  
+        query.setParameter("drawid", draw.getDrawid());                                  //get the result to object draw    
+        if (query.getResultList().isEmpty()) {                                           //check if resultlist is empty which means draw not exist       
+            em.persist(draw);                                                            //if no exist write the draw to database
+            recordsWritted += 1;                                                         //increace the number of draws writed 
         }
-        em.getTransaction().commit();
-        em.close();
-        emf.close();
-        return recordsWritted;
+        em.getTransaction().commit();                                                    //save changes to database
+        em.close();                                 
+        emf.close();                                                                     //close connections from database
+        return recordsWritted;                                                           //return the number of total draws writted
     }
     
-    private void drawTable1() {
-        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
-        DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
-        model.setRowCount(0);
-        int no = 1;
-        for (Draw draw : drawsMain) {
-            Object rowData[] = new Object[9];
-            rowData[0] = no;
-            rowData[1] = draw.getDrawid();
-            rowData[2] = draw.getFirstnumber();
-            rowData[3] = draw.getSecondnumber();
-            rowData[4] = draw.getThirdnumber();
-            rowData[5] = draw.getFourthnumber();
-            rowData[6] = draw.getFifthnumber();
-            rowData[7] = draw.getJoker();
-            rowData[8] = sdf.format(draw.getDrawidtime());
-            model.addRow(rowData);
-            no += 1;
-        }
-    }
-    
-    private void showAvailableData() {
-        createEMFandEM();
-        em.getTransaction().begin();
-        //Query query = em.createNamedQuery("Draw.findAll",Draw.class);
-        drawsMain.clear();
-        Query query = em.createNativeQuery("SELECT DISTINCT * FROM DRAW INNER JOIN PRIZECATEGORY ON PRIZECATEGORY.DRAWID = DRAW.DRAWID ORDER BY PRIZECATEGORY.IDCATEGORY",Draw.class);
-        drawsMain = query.getResultList();
-   //     drawTable1();
-        for (Draw draw : drawsMain) {
-            Collection<Prizecategory> pz = draw.getPrizecategoryCollection();
-            for (Prizecategory p : pz) {
-                System.out.println(p.getIdcategory());
-            }
-        }
-        em.close();
-        emf.close();
-    }
-
+    //method to delete draw from database
     private static int deleteDraw(int drawId) {
-        int recordsDeleted = 0;
-        createEMFandEM();
-        em.getTransaction().begin();
-        if (findDraw(drawId)) {
-            Query query = em.createNamedQuery("Draw.findByDrawid", Draw.class);
-            query.setParameter("drawid", drawId);
+        int recordsDeleted = 0;                                                         //variable to record how many draws have deleted to databes
+        createEMFandEM();                                                               //call method to create manager and factory
+        em.getTransaction().begin();                                                    //database connection
+        Query query = em.createNamedQuery("Draw.findByDrawid", Draw.class);             //if exist call query with the parameter of drawid  
+        query.setParameter("drawid", drawId);                                           //get the result to object draw    
+        if (!query.getResultList().isEmpty()) {                                         //check if resultlist is empty which means draw not exist
             Draw draw = (Draw) query.getSingleResult();
-            em.remove(draw);
-            recordsDeleted += 1;
+            em.remove(draw);                                                            //remove draw from database
+            recordsDeleted += 1;                                                        //increace the number of draws deleted
         }
-        em.getTransaction().commit();
-        em.close();
-        emf.close();
-        return recordsDeleted;
+        em.getTransaction().commit();                                                   //save changes to database
+        em.close();                                                                     
+        emf.close();                                                                    //close connections from database
+        return recordsDeleted;                                                          //return the number of total draws deleted 
     }
-
-    private static int deleteDrawRange(Date start, Date end) {
-        int recordsDeleted = 0;
-        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
-        sdf.setLenient(false);
+    
+    //method to delete draws from database between range of date
+    private static int deleteDrawRange(Date start, Date end) {      
+        int recordsDeleted = 0;                                                         //variable to record how many draws have deleted to databes
         Date drawDate = null;
 
-        createEMFandEM();
-        em.getTransaction().begin();
-        Query query = em.createNamedQuery("Draw.findAll", Draw.class);
-        List<Draw> draws = query.getResultList();
+        createEMFandEM();                                                               //call method to create manager and factory
+        em.getTransaction().begin();                                                    //database connection
+        Query query = em.createNamedQuery("Draw.findAll", Draw.class);                  //query database to get all draws
+        List<Draw> draws = query.getResultList();           
 
-        for (Draw draw : draws) {
+        for (Draw draw : draws) {                                                       //iterate over draw list to check if each draw date is between the select date
                 drawDate = draw.getDrawidtime();
             if ((drawDate.before(end) && drawDate.after(start)) || drawDate.equals(start) || drawDate.equals(end)) {
-                em.remove(draw);
+                em.remove(draw);                                                        //if it is delete the current draw and increase the counter
                 recordsDeleted += 1;
             }
         }
-        em.getTransaction().commit();
+        em.getTransaction().commit();                                                   //save changes to database
+        em.close();                                         
+        emf.close();                                                                    //close connections from database
+        return recordsDeleted;                                                          //return the number of total draws deleted 
+    }
+    
+    private void showAvailableData() {
+        drawsMain.clear();
+        createEMFandEM();
+        em.getTransaction().begin();
+        Query query = em.createNamedQuery("Draw.findAll", Draw.class);
+        drawsMain = query.getResultList();
+        drawTable1();
         em.close();
         emf.close();
-        return recordsDeleted;
     }
     
     /**
@@ -203,23 +204,25 @@ public class R2screen extends javax.swing.JFrame {
         jTable2 = new javax.swing.JTable();
         jButtonSaveStatistics = new javax.swing.JButton();
         jButtonLoadStatistics = new javax.swing.JButton();
+        dataStatus = new javax.swing.JLabel();
+        dataStatus1 = new javax.swing.JLabel();
         jButtonViewStatistics = new javax.swing.JButton();
         jLabelInsertDrawRange = new javax.swing.JLabel();
-        jTextFieldDrawStartRange = new javax.swing.JTextField();
-        jTextFieldDrawEndRange = new javax.swing.JTextField();
         jLabelInsertDrawRange1 = new javax.swing.JLabel();
         jButtonViewStatisticsRange = new javax.swing.JButton();
         jPanel1 = new javax.swing.JPanel();
         jLabelInsertDrawForDel = new javax.swing.JLabel();
         jTextFieldDrawForDel = new javax.swing.JTextField();
         jButtonDeleteStatistics = new javax.swing.JButton();
-        jTextFieldDrawStartRangeDel = new javax.swing.JTextField();
         jLabelInsertDrawRange3 = new javax.swing.JLabel();
-        jTextFieldDrawEndRangeDel = new javax.swing.JTextField();
         jLabelInsertDrawRangeDel = new javax.swing.JLabel();
         jButtonDeleteStatisticsRange = new javax.swing.JButton();
         menuTitle1 = new javax.swing.JLabel();
+        jDateChooserDrawStartRangeDel = new com.toedter.calendar.JDateChooser();
+        jDateChooseDrawEndRangeDel = new com.toedter.calendar.JDateChooser();
         jLabel1 = new javax.swing.JLabel();
+        jDateChooserDrawEndRange = new com.toedter.calendar.JDateChooser();
+        jDateChooserDrawStartRange = new com.toedter.calendar.JDateChooser();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setBackground(new java.awt.Color(204, 204, 204));
@@ -356,6 +359,13 @@ public class R2screen extends javax.swing.JFrame {
             }
         });
 
+        dataStatus.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
+        dataStatus.setForeground(new java.awt.Color(255, 0, 51));
+        dataStatus.setText("ONLINE");
+
+        dataStatus1.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
+        dataStatus1.setText("Πηγή δεδομένων:");
+
         javax.swing.GroupLayout jPanelR2TablesLayout = new javax.swing.GroupLayout(jPanelR2Tables);
         jPanelR2Tables.setLayout(jPanelR2TablesLayout);
         jPanelR2TablesLayout.setHorizontalGroup(
@@ -367,19 +377,29 @@ public class R2screen extends javax.swing.JFrame {
                 .addComponent(jButtonLoadStatistics)
                 .addGap(98, 98, 98))
             .addGroup(jPanelR2TablesLayout.createSequentialGroup()
-                .addContainerGap()
+                .addGap(12, 12, 12)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 664, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 418, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 427, Short.MAX_VALUE))
+            .addGroup(jPanelR2TablesLayout.createSequentialGroup()
+                .addGap(188, 188, 188)
+                .addComponent(dataStatus1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(dataStatus)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanelR2TablesLayout.setVerticalGroup(
             jPanelR2TablesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanelR2TablesLayout.createSequentialGroup()
-                .addContainerGap()
+                .addGap(12, 12, 12)
+                .addGroup(jPanelR2TablesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(dataStatus)
+                    .addComponent(dataStatus1))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanelR2TablesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 328, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 221, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 221, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 288, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
                 .addGroup(jPanelR2TablesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jButtonSaveStatistics)
                     .addComponent(jButtonLoadStatistics))
@@ -396,24 +416,6 @@ public class R2screen extends javax.swing.JFrame {
 
         jLabelInsertDrawRange.setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
         jLabelInsertDrawRange.setText("Εισάγετε τον εύρος ημερομηνιών : ");
-
-        jTextFieldDrawStartRange.setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
-        jTextFieldDrawStartRange.setText("15-01-2022");
-        jTextFieldDrawStartRange.setMinimumSize(new java.awt.Dimension(12, 3));
-        jTextFieldDrawStartRange.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                jTextFieldDrawStartRangeMouseClicked(evt);
-            }
-        });
-
-        jTextFieldDrawEndRange.setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
-        jTextFieldDrawEndRange.setText("30-01-2022");
-        jTextFieldDrawEndRange.setMinimumSize(new java.awt.Dimension(12, 3));
-        jTextFieldDrawEndRange.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                jTextFieldDrawEndRangeMouseClicked(evt);
-            }
-        });
 
         jLabelInsertDrawRange1.setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
         jLabelInsertDrawRange1.setText("έως");
@@ -451,26 +453,8 @@ public class R2screen extends javax.swing.JFrame {
             }
         });
 
-        jTextFieldDrawStartRangeDel.setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
-        jTextFieldDrawStartRangeDel.setText("15-01-2022");
-        jTextFieldDrawStartRangeDel.setMinimumSize(new java.awt.Dimension(12, 3));
-        jTextFieldDrawStartRangeDel.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                jTextFieldDrawStartRangeDelMouseClicked(evt);
-            }
-        });
-
         jLabelInsertDrawRange3.setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
         jLabelInsertDrawRange3.setText("έως");
-
-        jTextFieldDrawEndRangeDel.setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
-        jTextFieldDrawEndRangeDel.setText("30-01-2022");
-        jTextFieldDrawEndRangeDel.setMinimumSize(new java.awt.Dimension(12, 3));
-        jTextFieldDrawEndRangeDel.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                jTextFieldDrawEndRangeDelMouseClicked(evt);
-            }
-        });
 
         jLabelInsertDrawRangeDel.setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
         jLabelInsertDrawRangeDel.setText("Εισάγετε τον εύρος ημερομηνιών : ");
@@ -489,36 +473,42 @@ public class R2screen extends javax.swing.JFrame {
         menuTitle1.setFont(new java.awt.Font("Arial", 1, 24)); // NOI18N
         menuTitle1.setText("Διαγραφή δεδομένων");
 
+        jDateChooserDrawStartRangeDel.setDateFormatString("dd-MM-yyyy");
+        jDateChooserDrawStartRangeDel.setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
+        jDateChooserDrawStartRangeDel.setPreferredSize(new java.awt.Dimension(140, 30));
+
+        jDateChooseDrawEndRangeDel.setDateFormatString("dd-MM-yyyy");
+        jDateChooseDrawEndRangeDel.setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
+        jDateChooseDrawEndRangeDel.setPreferredSize(new java.awt.Dimension(140, 30));
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(22, 22, 22)
-                        .addComponent(jLabelInsertDrawForDel)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jTextFieldDrawForDel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(139, 139, 139)
-                        .addComponent(jButtonDeleteStatistics)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jButtonDeleteStatisticsRange)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabelInsertDrawRangeDel)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jTextFieldDrawStartRangeDel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jLabelInsertDrawRange3)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jTextFieldDrawEndRangeDel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(53, 53, 53))
+                .addGap(22, 22, 22)
+                .addComponent(jLabelInsertDrawForDel)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jTextFieldDrawForDel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 53, Short.MAX_VALUE)
+                .addComponent(jLabelInsertDrawRangeDel)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jDateChooserDrawStartRangeDel, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabelInsertDrawRange3)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jDateChooseDrawEndRangeDel, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(25, 25, 25))
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGap(426, 426, 426)
                 .addComponent(menuTitle1)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(0, 0, Short.MAX_VALUE))
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(139, 139, 139)
+                .addComponent(jButtonDeleteStatistics)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jButtonDeleteStatisticsRange)
+                .addGap(108, 108, 108))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -528,23 +518,31 @@ public class R2screen extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabelInsertDrawRangeDel)
-                            .addComponent(jTextFieldDrawStartRangeDel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jTextFieldDrawEndRangeDel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabelInsertDrawRange3))
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jDateChooserDrawStartRangeDel, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabelInsertDrawRange3)
+                            .addComponent(jDateChooseDrawEndRangeDel, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(18, 18, 18)
                         .addComponent(jButtonDeleteStatisticsRange))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabelInsertDrawForDel)
-                            .addComponent(jTextFieldDrawForDel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jTextFieldDrawForDel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabelInsertDrawRangeDel))
                         .addGap(18, 18, 18)
                         .addComponent(jButtonDeleteStatistics)))
-                .addContainerGap(15, Short.MAX_VALUE))
+                .addContainerGap(14, Short.MAX_VALUE))
         );
 
         jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/frames/images/tzoker-logo_1_30.png"))); // NOI18N
+
+        jDateChooserDrawEndRange.setDateFormatString("dd-MM-yyyy");
+        jDateChooserDrawEndRange.setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
+        jDateChooserDrawEndRange.setPreferredSize(new java.awt.Dimension(140, 30));
+
+        jDateChooserDrawStartRange.setDateFormatString("dd-MM-yyyy");
+        jDateChooserDrawStartRange.setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
+        jDateChooserDrawStartRange.setPreferredSize(new java.awt.Dimension(140, 30));
 
         javax.swing.GroupLayout jPanelR2Layout = new javax.swing.GroupLayout(jPanelR2);
         jPanelR2.setLayout(jPanelR2Layout);
@@ -562,31 +560,31 @@ public class R2screen extends javax.swing.JFrame {
                         .addGap(254, 254, 254)
                         .addComponent(menuTitle))
                     .addGroup(jPanelR2Layout.createSequentialGroup()
-                        .addGroup(jPanelR2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                            .addGroup(jPanelR2Layout.createSequentialGroup()
-                                .addGap(100, 100, 100)
-                                .addComponent(jLabelInsertDraw)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jTextFieldDrawSelection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(57, 57, 57)
-                                .addComponent(jLabelInsertDrawRange)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jTextFieldDrawStartRange, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jLabelInsertDrawRange1))
-                            .addGroup(jPanelR2Layout.createSequentialGroup()
-                                .addGap(217, 217, 217)
-                                .addComponent(jButtonViewStatistics)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(jButtonViewStatisticsRange)))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jTextFieldDrawEndRange, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanelR2Layout.createSequentialGroup()
                         .addGap(65, 65, 65)
                         .addGroup(jPanelR2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(jPanelR2Tables, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
-                .addContainerGap(42, Short.MAX_VALUE))
+                .addContainerGap(33, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelR2Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jLabelInsertDraw)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jTextFieldDrawSelection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(70, 70, 70)
+                .addComponent(jLabelInsertDrawRange)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jDateChooserDrawStartRange, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabelInsertDrawRange1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jDateChooserDrawEndRange, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(47, 47, 47))
+            .addGroup(jPanelR2Layout.createSequentialGroup()
+                .addGap(217, 217, 217)
+                .addComponent(jButtonViewStatistics)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jButtonViewStatisticsRange)
+                .addGap(149, 149, 149))
         );
         jPanelR2Layout.setVerticalGroup(
             jPanelR2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -596,14 +594,16 @@ public class R2screen extends javax.swing.JFrame {
                         .addGap(20, 20, 20)
                         .addComponent(menuTitle, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(8, 8, 8)
-                .addGroup(jPanelR2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabelInsertDraw)
-                    .addComponent(jTextFieldDrawSelection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabelInsertDrawRange)
-                    .addComponent(jTextFieldDrawStartRange, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jTextFieldDrawEndRange, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabelInsertDrawRange1))
+                .addGap(9, 9, 9)
+                .addGroup(jPanelR2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanelR2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabelInsertDraw)
+                        .addComponent(jTextFieldDrawSelection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabelInsertDrawRange))
+                    .addGroup(jPanelR2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(jDateChooserDrawStartRange, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jDateChooserDrawEndRange, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabelInsertDrawRange1, javax.swing.GroupLayout.Alignment.TRAILING)))
                 .addGap(18, 18, 18)
                 .addGroup(jPanelR2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButtonViewStatistics)
@@ -634,157 +634,147 @@ public class R2screen extends javax.swing.JFrame {
     
     
     private void jButtonExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonExitActionPerformed
-        this.dispose();
+        this.dispose();                                 //close this screen and return to main menu
         new Menu().setVisible(true);
     }//GEN-LAST:event_jButtonExitActionPerformed
 
     private void jTextFieldDrawSelectionMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTextFieldDrawSelectionMouseClicked
-        jTextFieldDrawSelection.setText("");
+        jTextFieldDrawSelection.setText("");            //clear the text to selected text field
     }//GEN-LAST:event_jTextFieldDrawSelectionMouseClicked
-
+    
+    //show the single draw statistics
     private void jButtonViewStatisticsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonViewStatisticsActionPerformed
-        sortPrizeC = false;
-        drawsMain.clear();
+        dataStatus.setText("ONLINE");                                                           //show where the source of data
+        drawsMain.clear();                                                                      //clear drawsmain list
         try {
-            int drawSelected = Integer.parseInt(jTextFieldDrawSelection.getText());
-            if (drawSelected > 0) {
+            int drawSelected = Integer.parseInt(jTextFieldDrawSelection.getText());             //get drawid number for textfield
+            if (drawSelected > 0) {                                                             //if is above 0 then call showdraw method
                 try {
-                    showDraw();
-                } catch (NullPointerException e) {
-                    JOptionPane.showMessageDialog(this, "Η συγκεκριμένη κλήρωση δεν υπάρχει.");
+                    showDraw();                                                                     
+                } catch (NullPointerException e) {                                              //if draw doesn't exist we get exception and print warning message
+                    JOptionPane.showMessageDialog(this, "Η συγκεκριμένη κλήρωση δεν υπάρχει."); //we clear table 1 and table 2
                     DefaultTableModel model1 = (DefaultTableModel) jTable1.getModel();
                     model1.setRowCount(0);
                     DefaultTableModel model2 = (DefaultTableModel) jTable2.getModel();
                     model2.setRowCount(0);
                 }
-            } else {
-                JOptionPane.showMessageDialog(this, "Παρακαλούμε εισάγετε έγκυρo αριθμός κλήρωσης.");
+            } else {                                                                                        
+                JOptionPane.showMessageDialog(this, "Παρακαλούμε εισάγετε έγκυρo αριθμός κλήρωσης."); //if typed drawid number is bellow 0 print warning message
             }
         } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Παρακαλούμε εισάγετε έγκυρo αριθμός κλήρωσης.");
+            JOptionPane.showMessageDialog(this, "Παρακαλούμε εισάγετε έγκυρo αριθμός κλήρωσης.");     //if typed text isn't number print warning message
         }
     }//GEN-LAST:event_jButtonViewStatisticsActionPerformed
-
+    
     private void jTable1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable1MouseClicked
-        JTable source = (JTable) evt.getSource();
+        JTable source = (JTable) evt.getSource();                   
         int column = 1;
         int row = source.rowAtPoint(evt.getPoint());
-        String value = jTable1.getModel().getValueAt(row, column).toString();
-        showWinnings(Integer.valueOf(value));
+        String value = jTable1.getModel().getValueAt(row, column).toString();   //get the draw number when mouse click in certain row of table 1
+        showWinnings(Integer.valueOf(value));                                   //call method showinnings with drawid number and display prize category winnings
     }//GEN-LAST:event_jTable1MouseClicked
 
-    private void jTextFieldDrawStartRangeMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTextFieldDrawStartRangeMouseClicked
-        jTextFieldDrawStartRange.setText("");
-    }//GEN-LAST:event_jTextFieldDrawStartRangeMouseClicked
-
-    private void jTextFieldDrawEndRangeMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTextFieldDrawEndRangeMouseClicked
-        jTextFieldDrawEndRange.setText("");
-    }//GEN-LAST:event_jTextFieldDrawEndRangeMouseClicked
-
+    //show a range of draw by date statistics
     private void jButtonViewStatisticsRangeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonViewStatisticsRangeActionPerformed
-        sortPrizeC = false;
-        drawsMain.clear();
-        String startDate = jTextFieldDrawStartRange.getText();
-        String endDate = jTextFieldDrawEndRange.getText();
-        Date start = new Date();
-        Date end = new Date();
+        dataStatus.setText("ONLINE");                                                                  //show where the source of data
+        drawsMain.clear();                                                                             //clear drawsmain list
+        SimpleDateFormat opap = new SimpleDateFormat("yyyy-MM-dd");                                    //opap-format request to call api
 
-        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
-        SimpleDateFormat opap = new SimpleDateFormat("yyyy-MM-dd");
-        sdf.setLenient(false);
         try {
-            start = sdf.parse(startDate);
-            end = sdf.parse(endDate);
-        } catch (ParseException e) {
-            JOptionPane.showMessageDialog(this, "Εισάγετε την ημερομηνία στη μορφή 15-01-2022 .");
-        }
-        try {
-            String startToSting = opap.format(start);
-            String endToString = opap.format(end);
-            showRange("draw-date/" + startToSting + "/" + endToString);
+            if ((jDateChooserDrawStartRange.getDate() != null) && (jDateChooserDrawEndRange.getDate() != null)) {
+                String startDateString = opap.format(jDateChooserDrawStartRange.getDate());           //get date from startRange chooser and conver it
+                String endDateString = opap.format(jDateChooserDrawEndRange.getDate());               //get date from endRange chooser and conver it
+                try {
+                    showRange("draw-date/" + startDateString + "/" + endDateString);                  //call method showRange to get the draws from api call
+                } catch (NullPointerException | ArrayIndexOutOfBoundsException ex) {                  //if not results found or error show warning
+                    JOptionPane.showMessageDialog(this, "Δεν υπάρχουν κληρώσεις ή το εύρος ξεπερνάει το τρίμηνο");
+                    DefaultTableModel model1 = (DefaultTableModel) jTable1.getModel();                //clear table 1
+                    model1.setRowCount(0);
+                    DefaultTableModel model2 = (DefaultTableModel) jTable2.getModel();                //clear table 2
+                    model2.setRowCount(0);
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, "Εισάγετε την ημερομηνία στη μορφή 15-01-2022 .");      //if there is error in parsing then display message
+            }
         } catch (NullPointerException ex) {
-            JOptionPane.showMessageDialog(this, "Δεν υπάρχουν κληρώσεις ή το εύρος ξεπερνάει το τρίμηνο");
-            DefaultTableModel model1 = (DefaultTableModel) jTable1.getModel();
-            model1.setRowCount(0);
-            DefaultTableModel model2 = (DefaultTableModel) jTable2.getModel();
-            model2.setRowCount(0);
+            JOptionPane.showMessageDialog(this, "Εισάγετε την ημερομηνία στη μορφή 15-01-2022 .");      //if there is error in parsing then display message
         }
     }//GEN-LAST:event_jButtonViewStatisticsRangeActionPerformed
-
+        
     private void jButtonSaveStatisticsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSaveStatisticsActionPerformed
-        int records = 0;
-        for (Draw draw : drawsMain) {
-            records += insertDraw(draw);
+        int records = 0;                
+        for (Draw draw : drawsMain) {                   //iterate over drawsmain list       
+            records += insertDraw(draw);                //calls insertDraw method for each draw and get result 
         }
-        if (records > 0) {
+        if (records > 0) {                                                                              //if number os saved draws is above 0 display the current number
             JOptionPane.showMessageDialog(this, "Αποθηκεύτηκαν " + records + " κληρώσεις. ");
-        } else {
+        } else {                                                                                        //else print no result message
             JOptionPane.showMessageDialog(this, "Δεν αποθηκεύτηκε καμία κλήρωση διότι υπήρχαν ήδη στη βάση δεδομένων.");
         }
     }//GEN-LAST:event_jButtonSaveStatisticsActionPerformed
 
     private void jTextFieldDrawForDelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTextFieldDrawForDelMouseClicked
-        jTextFieldDrawForDel.setText("");
+        jTextFieldDrawForDel.setText("");           //clear the text to select text field
     }//GEN-LAST:event_jTextFieldDrawForDelMouseClicked
 
     private void jButtonDeleteStatisticsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDeleteStatisticsActionPerformed
-        int response = JOptionPane.showConfirmDialog(null, "Θέλετε να προχωρήσετε σε διαγραφή;", "Επιβεβαίωση", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-        if (response == JOptionPane.YES_OPTION) {
-
-            int drawid = 0;
+        int response = JOptionPane.showConfirmDialog(null, "Θέλετε να προχωρήσετε σε διαγραφή;", "Επιβεβαίωση", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE); //ask confirmation for delete
+        if (response == JOptionPane.YES_OPTION) {       //if user answer yes proceed                    
             try {
-                drawid = Integer.parseInt(jTextFieldDrawForDel.getText());
+                int drawSelected = Integer.parseInt(jTextFieldDrawForDel.getText());                   //get drawid number from textfield
+                if (drawSelected > 0) {                                                                //if is above 0 then call showdraw method
+                    try {
+                        int records = deleteDraw(drawSelected);                                         //call deletedraw method and if draw is deleted (1)
+                        if (records > 0) {          
+                            JOptionPane.showMessageDialog(this, "Η κλήρωση " + drawSelected + " διαγράφηκε επιτυχώς.");         //print confirmation
+                        } else {
+                            JOptionPane.showMessageDialog(this, "Δεν βρέθηκε η κλήρωση στη βάση δεδομένων. ");                  //if not deleted show info to user
+                        }
+                    } catch (NullPointerException e) {                                                 //if draw doesn't exist we get exception and print warning message
+                        JOptionPane.showMessageDialog(this, "Η συγκεκριμένη κλήρωση δεν υπάρχει.");    //we clear table 1 and table 2
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(this, "Παρακαλούμε εισάγετε αριθμό κληρωσης σε μορφή '3295' "); //if typed drawid number is bellow 0 print warning message
+                }
             } catch (NumberFormatException e) {
-                JOptionPane.showMessageDialog(this, "Παρακαλούμε εισάγετε αριθμό κληρωσης σε μορφή '3295' ");
-            }
-            int records = deleteDraw(drawid);
-            if (records > 0) {
-                JOptionPane.showMessageDialog(this, "Η κλήρωση " + drawid + " διαγράφηκε επιτυχώς.");
-            } else {
-                JOptionPane.showMessageDialog(this, "Δεν βρέθηκε η κλήρωση στη βάση δεδομένων. ");
+                JOptionPane.showMessageDialog(this, "Παρακαλούμε εισάγετε αριθμό κληρωσης σε μορφή '3295' ");     //if typed text isn't number print warning message
             }
         }
     }//GEN-LAST:event_jButtonDeleteStatisticsActionPerformed
 
-    private void jTextFieldDrawStartRangeDelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTextFieldDrawStartRangeDelMouseClicked
-        jTextFieldDrawStartRangeDel.setText("");
-        jTextFieldDrawEndRangeDel.setText("");
-    }//GEN-LAST:event_jTextFieldDrawStartRangeDelMouseClicked
-
-    private void jTextFieldDrawEndRangeDelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTextFieldDrawEndRangeDelMouseClicked
-        jTextFieldDrawStartRangeDel.setText("");
-        jTextFieldDrawEndRangeDel.setText("");
-    }//GEN-LAST:event_jTextFieldDrawEndRangeDelMouseClicked
-
     private void jButtonDeleteStatisticsRangeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDeleteStatisticsRangeActionPerformed
-        String startDate = jTextFieldDrawStartRangeDel.getText();
-        String endDate = jTextFieldDrawEndRangeDel.getText();
-        Date start;
-        Date end;
+            SimpleDateFormat test = new SimpleDateFormat("dd-MM-yyyy");                                         //date format to check user input
 
-        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
-        sdf.setLenient(false);
-        try {
-            start = sdf.parse(startDate);
-            end = sdf.parse(endDate);
-            int response = JOptionPane.showConfirmDialog(null, "Θέλετε να προχωρήσετε σε διαγραφή;", "Επιβεβαίωση", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-            if (response == JOptionPane.YES_OPTION) {
+            try { 
+            String startDateCheck = test.format(jDateChooserDrawStartRangeDel.getDate());                       //check start date
+            String endDateCheck = test.format(jDateChooseDrawEndRangeDel.getDate());                            //check end date
+            Date start = jDateChooserDrawStartRangeDel.getDate();                                               //get date from start field or daletion range
+            Date end = jDateChooseDrawEndRangeDel.getDate();                                                    //get date from end field or daletion range
 
-                int records = deleteDrawRange(start, end);
-                if (records > 0) {
-                    JOptionPane.showMessageDialog(this, "Διαγράφηκαν " + records + " κληρώσεις επιτυχώς.");
+            int response = JOptionPane.showConfirmDialog(null, "Θέλετε να προχωρήσετε σε διαγραφή;", "Επιβεβαίωση", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE); //ask confirmation for delete
+            if (response == JOptionPane.YES_OPTION) {                                                           //if user answer yes proceed        
+                int records = deleteDrawRange(start, end);                                                      //call deletedraw method and if draw is deleted 
+                if (records > 0) {                                          
+                    JOptionPane.showMessageDialog(this, "Διαγράφηκαν " + records + " κληρώσεις επιτυχώς.");     //print confirmation and how many draws deleted
                 } else {
-                    JOptionPane.showMessageDialog(this, "Δεν βρέθηκε καμία κλήρωση στη βάση δεδομένων. ");
+                    JOptionPane.showMessageDialog(this, "Δεν βρέθηκε καμία κλήρωση στη βάση δεδομένων. ");      //if none deleted show info to user
                 }
             }
-        } catch (ParseException e) {
-            JOptionPane.showMessageDialog(this, "Εισάγετε την ημερομηνία στη μορφή 15/01/2022 .");
+        } catch (NumberFormatException | NullPointerException ex) {
+            JOptionPane.showMessageDialog(this, "Εισάγετε την ημερομηνία στη μορφή 15-01-2022 .");      //if there is error in parsing then display message
+            System.out.println("error");
         }
+        
+        
+        
+        
+        
     }//GEN-LAST:event_jButtonDeleteStatisticsRangeActionPerformed
 
     private void jButtonLoadStatisticsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonLoadStatisticsActionPerformed
-        sortPrizeC = true;
-        showAvailableData();
+        dataStatus.setText("DATABASE");           //show where the source of data
+        dataStatus.setForeground(Color.BLUE);     //change color of label
+        showAvailableData();                      //show data of database
     }//GEN-LAST:event_jButtonLoadStatisticsActionPerformed
 
     /**
@@ -803,14 +793,14 @@ public class R2screen extends javax.swing.JFrame {
                     break;
                 }
             }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(R2screen.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (ClassNotFoundException ex) {                                                                                   //catch exceptions
+            System.out.println(ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(R2screen.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            System.out.println(ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(R2screen.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            System.out.println(ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(R2screen.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            System.out.println(ex);
         }
         //</editor-fold>
         //</editor-fold>
@@ -828,6 +818,8 @@ public class R2screen extends javax.swing.JFrame {
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel dataStatus;
+    private javax.swing.JLabel dataStatus1;
     private javax.swing.JButton jButtonDeleteStatistics;
     private javax.swing.JButton jButtonDeleteStatisticsRange;
     private javax.swing.JButton jButtonExit;
@@ -835,6 +827,10 @@ public class R2screen extends javax.swing.JFrame {
     private javax.swing.JButton jButtonSaveStatistics;
     private javax.swing.JButton jButtonViewStatistics;
     private javax.swing.JButton jButtonViewStatisticsRange;
+    private com.toedter.calendar.JDateChooser jDateChooseDrawEndRangeDel;
+    private com.toedter.calendar.JDateChooser jDateChooserDrawEndRange;
+    private com.toedter.calendar.JDateChooser jDateChooserDrawStartRange;
+    private com.toedter.calendar.JDateChooser jDateChooserDrawStartRangeDel;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabelInsertDraw;
     private javax.swing.JLabel jLabelInsertDrawForDel;
@@ -849,12 +845,8 @@ public class R2screen extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTable jTable1;
     private javax.swing.JTable jTable2;
-    private javax.swing.JTextField jTextFieldDrawEndRange;
-    private javax.swing.JTextField jTextFieldDrawEndRangeDel;
     private javax.swing.JTextField jTextFieldDrawForDel;
     private javax.swing.JTextField jTextFieldDrawSelection;
-    private javax.swing.JTextField jTextFieldDrawStartRange;
-    private javax.swing.JTextField jTextFieldDrawStartRangeDel;
     private javax.swing.JLabel menuTitle;
     private javax.swing.JLabel menuTitle1;
     // End of variables declaration//GEN-END:variables

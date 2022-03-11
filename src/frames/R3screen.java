@@ -18,19 +18,21 @@ import pkg3hge.Draw;
 
 /**
  *
- * @author Hyperer
+ * @author Konstantinos Meliras, Konstantinos Kontovas, Stamatis Asterios
  */
 public class R3screen extends javax.swing.JFrame {
 
-    static EntityManagerFactory emf;
-    static EntityManager em;
+    private static EntityManagerFactory emf;
+    private static EntityManager em;
     static String[] monthName = {"Ιανουάριος", "Φεβρουάριος", "Μάρτιος", "Απρίλιος", "Μάιος", "Ιούνιος",
-        "Ιούλιος", "Αύγουστος", "Σεπτέμβριος", "Οκτώβριος", "Νοέμβριος", "Δεκέμβριος"};
-    static int yearForView;
-    static int monthForView;
-    static int totalDraws;
-    static int jackpots;
-    static String prizesFormated;
+        "Ιούλιος", "Αύγουστος", "Σεπτέμβριος", "Οκτώβριος", "Νοέμβριος", "Δεκέμβριος"};          //month list to display to table 1
+    private static int yearForView;                                                              //variable to select which year to view
+    static int monthForView;                                                             //variable to select which year to view
+    static int totalDraws = 0;                                                                   //variable to save how many draws we have retrieve and to display to R3results
+    static int jackpots = 0;                                                                     //variable to save how many jackpots we have and to display to R3results
+    static String prizesFormated;                                                                //variable to format the total money of prizes to display to R3results
+    private static List<Draw> availabeDraws = new ArrayList<>();                                 //list to save the available years
+    
 
     /**
      * Creates new form Menu
@@ -39,95 +41,91 @@ public class R3screen extends javax.swing.JFrame {
         initComponents();
         
     }
-
+    
+    //method to create Entity Manager and Factory to use for Database connection
     private static void createEMFandEM() {
         emf = Persistence.createEntityManagerFactory("3hGEPU");
         em = emf.createEntityManager();
     }
-
+    
+    //method to get all draws from the database
+    private static void getDraws(){
+        createEMFandEM();                                                   //call method to create manager and factory
+        em.getTransaction().begin();                                        //database connection
+        Query query = em.createNamedQuery("Draw.findAll", Draw.class);      //get all records from database    
+        availabeDraws = query.getResultList();                           //save draw results to draw list
+        em.close();                                                         //close connections from database
+        emf.close();                                                                 
+     }
+    
+    //method to display the available years to the user selection
     private static ArrayList showAvailableYears() {
-        ArrayList<Integer> years = new ArrayList<>();
-        int year;
-        createEMFandEM();
-        em.getTransaction().begin();
-        Query query = em.createNamedQuery("Draw.findAll", Draw.class);
-        List<Draw> draws = query.getResultList();
-        for (Draw draw : draws) {
-            year = draw.getDrawidtime().getYear() + 1900;
-            if (!years.contains(year)) {
+        ArrayList<Integer> years = new ArrayList<>();                       //list to save the available years
+        int year;                                                           //variable for the year
+        for (Draw draw : availabeDraws) {                                   //iterate over the draw list
+            year = draw.getDrawidtime().getYear() + 1900;                   //convert year to display it
+            if (!years.contains(year)) {                                    //if list years hasn't the current draw year the add it to the list 
                 years.add(year);
             }
         }
-        em.close();
-        emf.close();
-        return years;
+        return years;                                                       //return the list of available years 
     }
-
-    private static ArrayList showAvailableMonths(int year) {
-        int yearSelected = year - 1900;
-        yearForView = yearSelected;
-        ArrayList<Integer> months = new ArrayList<>();
-        createEMFandEM();
-        em.getTransaction().begin();
-        Query query = em.createNamedQuery("Draw.findAll", Draw.class);
-        List<Draw> draws = query.getResultList();
-
-        for (Draw draw : draws) {
-            int month = draw.getDrawidtime().getMonth();
-            if (yearSelected == draw.getDrawidtime().getYear()) {
-                if (!months.contains(month)) {
-                    months.add(month);
+    
+    //method to display the available months of selected year
+    private static ArrayList showAvailableMonths(int year) {                //take input the selected year
+        int yearSelected = year - 1900;                                     //covert year to compare it 
+        yearForView = yearSelected;                                         //save the selected year to use it in showdraw method
+        ArrayList<Integer> months = new ArrayList<>();                      //create list for the available months
+        for (Draw draw : availabeDraws) {                                   //iterate over the draw list
+            int month = draw.getDrawidtime().getMonth();                    //get each draw month
+            if (yearSelected == draw.getDrawidtime().getYear()) {           //if selected year is the year of draw
+                if (!months.contains(month)) {                              //and does't exist in the list months
+                    months.add(month);                                      //save it to the list
                 }
             }
         }
-        em.close();
-        emf.close();
-        return months;
+        return months;                                                      //return the list of available months 
     }
-
-    private void drawTable1(ArrayList<Integer> years) {
+    
+    //method to display the list of available years to table 1
+    private void drawTable1(ArrayList<Integer> years) {                     //take input the list of available years
         DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
-        model.setRowCount(0);
-        for (Integer year : years) {
-            Object rowData[] = new Object[1];
-            rowData[0] = year;
-            model.addRow(rowData);
+        model.setRowCount(0);                                               //crete table of 1 column
+        for (Integer year : years) {                                        //iterate over years list
+            Object rowData[] = new Object[1];                               
+            rowData[0] = year;                                              //add value 
+            model.addRow(rowData);                                          //add row to the table
         }
     }
     
-    private void drawTable2(ArrayList<Integer> months) {
+    //method to display the list of available months to table 2
+    private void drawTable2(ArrayList<Integer> months) {                    //take input the list of available months
         DefaultTableModel model = (DefaultTableModel) jTable2.getModel();
-        model.setRowCount(0);
-        for (Integer month : months) {
-            Object rowData[] = new Object[1];
-            rowData[0] = monthName[month];
-            model.addRow(rowData);
+        model.setRowCount(0);                                               //crete table of 1 column
+        for (Integer month : months) {                                      //iterate over months list
+            Object rowData[] = new Object[1];                   
+            rowData[0] = monthName[month];                                  //add value
+            model.addRow(rowData);                                          //add row to the table
         }
     }
     
+    //method to calculate total money distributed for all prize categories and display all data to R3result screen
     private void showDraws() {
         totalDraws = 0;
         jackpots = 0;
-        int totalPrizes = 0;
-          
-        createEMFandEM();
-        em.getTransaction().begin();
-        Query query = em.createNamedQuery("Draw.findAll", Draw.class);
-        List<Draw> draws = query.getResultList();
+        int totalPrizes = 0;                                                //variable for total money
         
-        for (Draw draw : draws) {
-            if (yearForView == draw.getDrawidtime().getYear()) {
-                if (monthForView == draw.getDrawidtime().getMonth()) {
-                   totalDraws += 1;
-                   jackpots += draw.getjackpots();
-                   totalPrizes += draw.getdistributedMoney();
+        for (Draw draw : availabeDraws) {                                   //iterate over list of draws
+            if (yearForView == draw.getDrawidtime().getYear()) {            //check if the draw year is the selected
+                if (monthForView == draw.getDrawidtime().getMonth()) {      //check if the draw month is the selected
+                   totalDraws += 1;                                         //increase number of draws
+                   jackpots += draw.getjackpots();                          //increase number of draws
+                   totalPrizes += draw.getdistributedMoney();               //add distributed money
                 }
             }
         }
-        em.close();
-        emf.close();
-        prizesFormated = String.format("%,d", totalPrizes);
-        new R3results().setVisible(true);
+        prizesFormated = String.format("%,d", totalPrizes);                 //convert total money to string
+        new R3results().setVisible(true);                                   //create R3result sceen to display all the results
     }
         
     /**
@@ -341,39 +339,40 @@ public class R3screen extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButtonExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonExitActionPerformed
-        this.dispose();
+        this.dispose();                     //close this screen and return to main menu
         new Menu().setVisible(true);
     }//GEN-LAST:event_jButtonExitActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        ArrayList<Integer> years = showAvailableYears();
-        if(years.isEmpty()){
+        getDraws();                                                                     //call method getDraws to get all the draws from database
+        ArrayList<Integer> years = showAvailableYears();                                //call method showAvailableYears to get all the available years of the draws
+        if(years.isEmpty()){                                                            //if the years list is empty display report message
             JOptionPane.showMessageDialog(this, "Δεν υπάρχουν δεδομένα για εμφάνιση.");
         }else {
-            drawTable1(years);
+            drawTable1(years);                                                          //else call method drawTable1 to display the list of available years to table 1
         }
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jTable1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable1MouseClicked
-        JTable source = (JTable) evt.getSource();
+        JTable source = (JTable) evt.getSource();                                           //get the selected year when user click a year from table 1
         int column = 0;
-        int row = source.rowAtPoint(evt.getPoint());
+        int row = source.rowAtPoint(evt.getPoint());                                        
         String yearSelected = jTable1.getModel().getValueAt(row, column).toString();
-        ArrayList<Integer> months = showAvailableMonths(Integer.parseInt(yearSelected));
-        drawTable2(months);
+        ArrayList<Integer> months = showAvailableMonths(Integer.parseInt(yearSelected));    //call method showAvailableMonths to get all the available months
+        drawTable2(months);                                                                 //call method drawTable2 to display the list of available months to table 2
     }//GEN-LAST:event_jTable1MouseClicked
 
     private void jTable2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable2MouseClicked
-        JTable source = (JTable) evt.getSource();
+        JTable source = (JTable) evt.getSource();                                           //get the selected month when user click a month from table 2
         int column = 0;
         int row = source.rowAtPoint(evt.getPoint());
         String monthSelected = jTable2.getModel().getValueAt(row, column).toString();
-        for(int i = 0; i < monthName.length; i++) {
-            if(monthName[i].equals(monthSelected)){
-                monthForView = i;
+        for(int i = 0; i < monthName.length; i++) {                                         //if table2 text match with the name of monthname list
+            if(monthName[i].equals(monthSelected)){                                         
+                monthForView = i;                                                           //set variable montforview the number of monthname list index
             }
         }
-        showDraws();
+        showDraws();                                //call method showDraw to calculate and display the statistics to R3results screen
     }//GEN-LAST:event_jTable2MouseClicked
 
     /**

@@ -1,7 +1,7 @@
 ----------------------------------------------------------------
-Mon Mar 07 02:24:39 EET 2022:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.11.1.2 - (1629631): instance a816c00e-017f-61c3-8a37-00000a736f00 
-on database directory C:\Users\kosta\Documents\NetBeansProjects\3hGE\joker with class loader sun.misc.Launcher$AppClassLoader@24d46ca6 
+Fri Mar 11 12:56:37 EET 2022:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.11.1.2 - (1629631): instance a816c00e-017f-789f-909d-00000a224bc0 
+on database directory C:\Users\kosta\Documents\NetBeansProjects\3hGE\joker with class loader sun.misc.Launcher$AppClassLoader@4517d9a3 
 Loaded from file:/C:/Program%20Files/Java/jdk1.8.0_111/db/lib/derby.jar
 java.vendor=Oracle Corporation
 java.runtime.version=1.8.0_111-b14

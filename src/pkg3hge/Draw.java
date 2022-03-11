@@ -13,9 +13,12 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
 /**
- *
- * @author Hyperer
+ * @author Konstantinos Meliras, Konstantinos Kontovas, Stamatis Asterios
+ * 
+ * 
  */
+
+//Class
 @Entity
 @Table(name = "DRAW")
 @XmlRootElement
@@ -38,22 +41,22 @@ public class Draw implements Serializable {
     @Basic(optional = false)
     @Column(name = "ID")
     private Long id;
-    @Column(name = "DRAWID")
+    @Column(name = "DRAWID")        //Number of draw
     private Integer drawid;
-    @Column(name = "DRAWIDTIME")
+    @Column(name = "DRAWIDTIME")    //Date of draw
     @Temporal(javax.persistence.TemporalType.DATE)
     private Date drawidtime;
-    @Column(name = "FIRSTNUMBER")
+    @Column(name = "FIRSTNUMBER")   //First number of draw
     private Integer firstnumber;
-    @Column(name = "SECONDNUMBER")
+    @Column(name = "SECONDNUMBER")  //Second number of draw
     private Integer secondnumber;
-    @Column(name = "THIRDNUMBER")
+    @Column(name = "THIRDNUMBER")   //Third number of draw
     private Integer thirdnumber;
-    @Column(name = "FOURTHNUMBER")
+    @Column(name = "FOURTHNUMBER")  //Fourth number of draw
     private Integer fourthnumber;
-    @Column(name = "FIFTHNUMBER")
+    @Column(name = "FIFTHNUMBER")   //Fifth number of draw
     private Integer fifthnumber;
-    @Column(name = "JOKER")
+    @Column(name = "JOKER")         //Joker number of draw
     private Integer joker;
     @OneToMany(mappedBy = "drawid", cascade = CascadeType.ALL)
     private Collection<Prizecategory> prizecategoryCollection;
@@ -86,7 +89,7 @@ public class Draw implements Serializable {
     }
 
     public void setDrawidtime(long drawidtime) {
-        this.drawidtime = convertTime(drawidtime);
+        this.drawidtime = convertTime(drawidtime); //Call method to convert Date 
     }
 
     public Integer getFirstnumber() {
@@ -171,31 +174,32 @@ public class Draw implements Serializable {
         return "pkg3hge.Draw[ id=" + id + " ]";
     }
 
-    public int getdistributedMoney() {
+    //Method to get the total distributed money
+    public double getdistributedMoney() {
         double totalDistributed = 0;
         Collection<Prizecategory> prizeCat = getPrizecategoryCollection();
         for (Prizecategory pc : prizeCat) {
-            if ((pc.getIdcategory() == 1) || (pc.getIdcategory() == 2)) {
+            if ((pc.getIdcategory() == 1) || (pc.getIdcategory() == 2)) { //For the first two categories we also add the jackpot
                 totalDistributed = totalDistributed + pc.getDistributed() + pc.getJackpot();
             } else {
                 totalDistributed += pc.getDistributed();
             }
         }
-        return (int) totalDistributed;
+        return  totalDistributed;
     }
-
+    
+    //Method to check if we had jackpot in draw, we check only the first 2 Prize categories.
     public int getjackpots() {
-        for (Prizecategory pc : prizecategoryCollection) {
+        for (Prizecategory pc : prizecategoryCollection) {  
             if ((pc.getIdcategory() == 1) && (pc.getWinners() == 0)) {
                 return 1;
             }
         }
         return 0;
     }
-
+    //Method to convert Date from Unix format to human date
     public Date convertTime(long drawTimeUnix) {
-        long unixTime = drawTimeUnix / 1000;
-        Date date = new Date(unixTime * 1000L);
+        Date date = new Date(drawTimeUnix);
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
         sdf.setTimeZone(TimeZone.getTimeZone("GMT+2"));
         return date;

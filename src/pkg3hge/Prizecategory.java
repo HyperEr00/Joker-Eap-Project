@@ -11,7 +11,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
- * @author Hyperer
+ * @author Konstantinos Meliras, Konstantinos Kontovas, Stamatis Asterios
  */
 @Entity
 @Table(name = "PRIZECATEGORY")
@@ -32,18 +32,18 @@ public class Prizecategory implements Serializable,Comparable<Prizecategory> {
     @Basic(optional = false)
     @Column(name = "ID")
     private Long id;
-    @Column(name = "IDCATEGORY")
+    @Column(name = "IDCATEGORY")    //Prize category
     private Integer idcategory;
-    @Column(name = "DISTRIBUTED")
+    @Column(name = "DISTRIBUTED")   //Distributed money
     private Double distributed;
-    @Column(name = "DIVIDENT")
+    @Column(name = "DIVIDENT")          
     private Double divident;
-    @Column(name = "JACKPOT")
+    @Column(name = "JACKPOT")       //Money of Jackpot       
     private Double jackpot;
-    @Column(name = "WINNERS")
+    @Column(name = "WINNERS")       //Winners of each category
     private Integer winners;
-    @JoinColumn(name = "DRAWID", referencedColumnName = "DRAWID")
-    @ManyToOne
+    @JoinColumn(name = "DRAWID", referencedColumnName = "DRAWID") 
+    @ManyToOne                      //Foreign key
     private Draw drawid;
 
     public Prizecategory() {
@@ -144,7 +144,7 @@ public class Prizecategory implements Serializable,Comparable<Prizecategory> {
     }
 
     @Override
-    public int compareTo(Prizecategory t) {
+    public int compareTo(Prizecategory t) {     //Method to compare objects of Prizecategory
         if(this.getIdcategory() < t.getIdcategory()){
             return -1;
         }else if(this.getIdcategory() > t.getIdcategory()){

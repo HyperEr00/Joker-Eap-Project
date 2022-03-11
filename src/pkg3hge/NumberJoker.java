@@ -7,8 +7,11 @@ package pkg3hge;
 
 /**
  *
- * @author Hyperer
+ * @author Konstantinos Meliras, Konstantinos Kontovas, Stamatis Asterios
  */
+
+//class to use to get statistics for the winning numbers and joker numbers. we store for each number 
+//in certain range of draws the number of numbers'draws (occurrence) and the number of delays until last draw.
 public class NumberJoker implements Comparable<NumberJoker>{
 
     private int number;
@@ -46,7 +49,7 @@ public class NumberJoker implements Comparable<NumberJoker>{
     }
 
     @Override
-    public int compareTo(NumberJoker t) {
+    public int compareTo(NumberJoker t) {   //method to compare each numbers base to occurence
         if(this.occurrence > t.occurrence) { return -1;}
         else if(this.occurrence < t.occurrence) { return 1;}
         else {
