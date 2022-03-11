@@ -253,7 +253,6 @@ public class R4screen extends javax.swing.JFrame {
         setBackground(new java.awt.Color(204, 204, 204));
         setName("frameMenu"); // NOI18N
         setUndecorated(true);
-        setPreferredSize(new java.awt.Dimension(1200, 800));
         setResizable(false);
 
         jPanelMenu.setBackground(new java.awt.Color(204, 204, 204));
@@ -357,10 +356,10 @@ public class R4screen extends javax.swing.JFrame {
         });
 
         jDateChooserDrawEndRange.setDateFormatString("dd-MM-yyyy");
-        jDateChooserDrawEndRange.setFont(new java.awt.Font("Arial", 0, 22)); // NOI18N
+        jDateChooserDrawEndRange.setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
 
         jDateChooserDrawStartRange.setDateFormatString("dd-MM-yyyy");
-        jDateChooserDrawStartRange.setFont(new java.awt.Font("Arial", 0, 22)); // NOI18N
+        jDateChooserDrawStartRange.setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
 
         jPanel2.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
@@ -440,11 +439,11 @@ public class R4screen extends javax.swing.JFrame {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(jDateChooserDrawStartRange, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jDateChooserDrawStartRange, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jLabelInsertDrawRange1)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jDateChooserDrawEndRange, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jDateChooserDrawEndRange, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(94, 94, 94)))
                         .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 218, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(73, 73, 73)))
